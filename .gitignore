@@ -2,3 +2,21 @@ build/
 .cache
 .idea
 .DS_Store
+
+# buncha garbage
+third_party/fftw-3.3.10/**/Makefile
+third_party/fftw-3.3.10/**/Makefile.in
+third_party/fftw-3.3.10/**/.deps/
+third_party/fftw-3.3.10/**/.libs/
+third_party/fftw-3.3.10/**/*.lo
+third_party/fftw-3.3.10/**/*.la
+third_party/fftw-3.3.10/**/*.pc
+third_party/fftw-3.3.10/config.h
+third_party/fftw-3.3.10/config.log
+third_party/fftw-3.3.10/config.status
+third_party/fftw-3.3.10/libtool
+third_party/fftw-3.3.10/stamp-h1
+third_party/fftw-3.3.10/install_dir/
+third_party/fftw-3.3.10/build_tmp/
+third_party/fftw-3.3.10/tools/fftw-wisdom-to-conf
+third_party/fftw-3.3.10/tools/fftw_wisdom.1
