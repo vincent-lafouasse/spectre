@@ -65,5 +65,12 @@ distclean: fclean
 	$(RM) $(FFTW_INST)
 	@echo "\033[31mDeep cleaned FFTW vendor folder\033[0m"
 
+.PHONY: update
+update: fclean
+	mkdir -p build
+	echo "\033[33mGenerating compilation database with bear...\033[0m"
+	bear --output build/compile_commands.json -- $(MAKE) all
+	echo "\033[32mUpdate complete: build/compile_commands.json generated.\033[0m"
+
 re: fclean all
 
