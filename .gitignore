@@ -1,3 +1,4 @@
+spectre
 build/
 .cache
 .idea
@@ -20,3 +21,11 @@ third_party/fftw-3.3.10/install_dir/
 third_party/fftw-3.3.10/build_tmp/
 third_party/fftw-3.3.10/tools/fftw-wisdom-to-conf
 third_party/fftw-3.3.10/tools/fftw_wisdom.1
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.ascii
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/index.html
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/section1.html
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/section2.html
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/section3.html
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/section4.html
+third_party/fftw-3.3.10/doc/FAQ/fftw-faq.html/section5.html
+third_party/fftw-3.3.10/doc/fftw3.pdf
