@@ -14,10 +14,13 @@ FFTW_INST   = $(FFTW_DIR)/install_dir
 FFTW_LIB    = $(FFTW_INST)/lib/libfftw3f.a
 FFTW_CONFIG = --prefix=$(ROOT)/$(FFTW_INST) --enable-float --enable-neon --enable-static --disable-shared --with-pic --disable-fortran
 
-INCS        = -I$(SRCS_DIR) -I$(FFTW_INST)/include
+STB_VER     = 1.22
+STB_DIR    = third_party/stb_vorbis-$(STB_VER)
+
+INCS        = -I$(SRCS_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
 LIBS        = $(FFTW_LIB) -lm
 
-SRCS        = $(SRCS_DIR)/main.c
+SRCS        = $(shell find src -name '*.c')
 OBJS        = $(SRCS:$(SRCS_DIR)/%.c=$(BUILD_DIR)/%.o)
 
 .PHONY: all
