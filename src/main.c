@@ -9,6 +9,8 @@
 
 int main(void)
 {
+    // better than straight malloc as it aligns for potential SIMD
+    // https://www.fftw.org/fftw3_doc/SIMD-alignment-and-fftw_005fmalloc.html
     float* in = fftwf_alloc_real(N);
     float complex* out = (float complex*)fftwf_alloc_complex(N / 2 + 1);
 
