@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include <math.h>
 #include <complex.h>
+#include <math.h>
 #include <stdio.h>
 
 #include <fftw3.h>
-
 
 #define N 64
 
