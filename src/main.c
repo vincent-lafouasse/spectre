@@ -16,8 +16,9 @@ int main(void)
     fftwf_plan p = fftwf_plan_dft_r2c_1d(N, in, out, FFTW_ESTIMATE);
 
     // make a sine input
+    const float omega0 = 2.0f * M_PI / N;
     for (int i = 0; i < N; i++) {
-        in[i] = sinf(2.0f * M_PI * 4.0f * i / N);
+        in[i] = sinf(4.0f * omega0 * i);
     }
 
     // fft that shit
