@@ -14,7 +14,7 @@ int main(void)
     float* in = fftwf_alloc_real(N);
     float complex* out = (float complex*)fftwf_alloc_complex(N / 2 + 1);
 
-    fftwf_plan p = fftwf_plan_dft_r2c_1d(N, in, out, FFTW_ESTIMATE);
+    fftwf_plan p = fftwf_plan_dft_r2c_1d(N, in, out, FFTW_MEASURE);
 
     // make a sine input
     const float omega0 = 2.0f * M_PI / N;
