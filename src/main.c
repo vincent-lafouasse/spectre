@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include <fftw3.h>
 #include <math.h>
+#include <complex.h>
 #include <stdio.h>
+
+#include <fftw3.h>
+
 
 #define N 64
 
 int main(void)
 {
     float* in = fftwf_alloc_real(N);
-    fftwf_complex* out = fftwf_alloc_complex(N / 2 + 1);
+    float complex* out = (float complex*)fftwf_alloc_complex(N / 2 + 1);
 
     fftwf_plan p = fftwf_plan_dft_r2c_1d(N, in, out, FFTW_ESTIMATE);
 
@@ -21,10 +24,11 @@ int main(void)
     fftwf_execute(p);
 
     // there should be a peak at bin 4
-    printf("FFTW Linkage Test (ARM NEON optimized if configured):\n");
     printf("Bin | Magnitude\n----|----------\n");
     for (int i = 0; i < 8; i++) {
-        float mag = sqrtf(out[i][0] * out[i][0] + out[i][1] * out[i][1]);
+        const float real = crealf(out[i]);
+        const float imag = cimagf(out[i]);
+        float mag = sqrtf(real * real + imag * imag);
         printf("%3d | %8.2f %s\n", i, mag, (i == 4) ? "<-- Peak!" : "");
     }
 
