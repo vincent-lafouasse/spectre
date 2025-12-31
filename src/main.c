@@ -14,7 +14,7 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
-#define BUFFER_SIZE (4 * FFT_SIZE)
+#define BUFFER_SIZE (8 * FFT_SIZE)
 
 float g_ring_buffer[BUFFER_SIZE];
 _Atomic size_t g_write_index = 0;
