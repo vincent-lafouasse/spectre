@@ -3,6 +3,7 @@ build/
 .cache
 .idea
 .DS_Store
+*.asd
 
 # buncha garbage
 third_party/fftw-3.3.10/**/Makefile
