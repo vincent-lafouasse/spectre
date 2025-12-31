@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <complex.h>
 
+#include <fftw3.h>
 #include <raylib.h>
 
 #include "window/window.h"
@@ -18,6 +19,10 @@ int main(void)
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
     InitAudioDevice();
 
+    float* in = fftwf_alloc_real(FFT_SIZE);
+    fftwf_complex* out = fftwf_alloc_complex(FFT_SIZE);
+    fftwf_plan p = fftwf_plan_dft_r2c_1d(FFT_SIZE, in, out, FFTW_MEASURE);
+
     float window[FFT_SIZE];
     make_hann_window(window, FFT_SIZE);
 
@@ -32,6 +37,9 @@ int main(void)
         EndDrawing();
     }
 
+    fftwf_destroy_plan(p);
+    fftwf_free(in);
+    fftwf_free(out);
     UnloadSound(sound);
     CloseAudioDevice();
     CloseWindow();
