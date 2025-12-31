@@ -23,7 +23,7 @@ INCS        = -I$(SRCS_DIR) -I$(RAYLIB_DIR) -I$(FFTW_INST)/include
 LIBS        = $(RAYLIB_LIB) $(FFTW_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 
 SRCS        = $(shell find src -name '*.c')
-OBJS        = $(SRCS:$(SRCS_DIR)/%.c=$(BUILD_DIR)/%.o)
+OBJS        = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 .PHONY: all
 all: $(NAME)
@@ -32,7 +32,8 @@ $(NAME): $(RAYLIB_LIB) $(FFTW_LIB) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
 	@echo "\033[32mLinked $(NAME) successfully\033[0m"
 
-$(BUILD_DIR)/%.o: $(SRCS_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 	@echo "\033[34mCompiled $<\033[0m"
 
