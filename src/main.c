@@ -17,8 +17,31 @@
 #define BUFFER_SIZE (4 * FFT_SIZE)
 
 float g_ring_buffer[BUFFER_SIZE];
-_Atomic size_t head = 0;
-_Atomic size_t tail = 0;
+_Atomic size_t g_write_index = 0;
+_Atomic size_t g_read_index = 0;
+
+// producer (audio thread)
+void g_buffer_enqueue(float f)
+{
+    const size_t write_idx =
+        atomic_load_explicit(&g_write_index, memory_order_relaxed);
+    g_ring_buffer[write_idx] = f;
+
+    const size_t next_write_idx = (write_idx + 1) & (BUFFER_SIZE - 1);
+    atomic_store_explicit(&g_write_index, next_write_idx, memory_order_release);
+}
+
+// consumer (fft thread)
+float g_buffer_dequeue(void)
+{
+    const size_t read_idx =
+        atomic_load_explicit(&g_read_index, memory_order_relaxed);
+    const float f = g_ring_buffer[read_idx];
+
+    const size_t next_read_idx = (read_idx + 1) % BUFFER_SIZE;
+    atomic_store_explicit(&g_read_index, next_read_idx, memory_order_release);
+    return f;
+}
 
 int main(void)
 {
