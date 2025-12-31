@@ -22,8 +22,8 @@ RAYLIB_VER  = 5.5
 RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
 RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
 
-INCS        = -I$(SRCS_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
-LIBS        = $(FFTW_LIB) -lm
+INCS        = -I$(SRCS_DIR) -I$(RAYLIB_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
+LIBS        = $(RAYLIB_LIB) $(FFTW_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 
 SRCS        = $(shell find src -name '*.c')
 OBJS        = $(SRCS:$(SRCS_DIR)/%.c=$(BUILD_DIR)/%.o)
