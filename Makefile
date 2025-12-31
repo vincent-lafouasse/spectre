@@ -15,14 +15,11 @@ FFTW_LIB    = $(FFTW_INST)/lib/libfftw3f.a
 # NOTE: NEON is ARM, x86 AVX TODO
 FFTW_CONFIG = --prefix=$(ROOT)/$(FFTW_INST) --enable-float --enable-neon --enable-static --disable-shared --with-pic --disable-fortran
 
-STB_VER     = 1.22
-STB_DIR     = third_party/stb_vorbis-$(STB_VER)
-
 RAYLIB_VER  = 5.5
 RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
 RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
 
-INCS        = -I$(SRCS_DIR) -I$(RAYLIB_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
+INCS        = -I$(SRCS_DIR) -I$(RAYLIB_DIR) -I$(FFTW_INST)/include
 LIBS        = $(RAYLIB_LIB) $(FFTW_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 
 SRCS        = $(shell find src -name '*.c')
