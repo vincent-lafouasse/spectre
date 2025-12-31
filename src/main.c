@@ -10,9 +10,12 @@
 #define STRIDE_RATIO 2
 #define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
 
+#define WINDOW_WIDTH 1600
+#define WINDOW_HEIGHT 900
+
 int main(void)
 {
-    InitWindow(100, 100, "title");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
     InitAudioDevice();
 
     float window[FFT_SIZE];
