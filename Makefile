@@ -12,6 +12,7 @@ FFTW_VER    = 3.3.10
 FFTW_DIR    = third_party/fftw-$(FFTW_VER)
 FFTW_INST   = $(FFTW_DIR)/install_dir
 FFTW_LIB    = $(FFTW_INST)/lib/libfftw3f.a
+# NOTE: NEON is ARM, x86 AVX TODO
 FFTW_CONFIG = --prefix=$(ROOT)/$(FFTW_INST) --enable-float --enable-neon --enable-static --disable-shared --with-pic --disable-fortran
 
 STB_VER     = 1.22
