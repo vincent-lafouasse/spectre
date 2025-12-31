@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include <complex.h>
+#include <stdatomic.h>
 
 #include <fftw3.h>
 #include <raylib.h>
@@ -13,6 +13,12 @@
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
+
+#define BUFFER_SIZE (4 * FFT_SIZE)
+
+float g_ring_buffer[BUFFER_SIZE];
+_Atomic size_t head = 0;
+_Atomic size_t tail = 0;
 
 int main(void)
 {
