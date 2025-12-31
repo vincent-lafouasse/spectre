@@ -16,7 +16,7 @@ FFTW_LIB    = $(FFTW_INST)/lib/libfftw3f.a
 FFTW_CONFIG = --prefix=$(ROOT)/$(FFTW_INST) --enable-float --enable-neon --enable-static --disable-shared --with-pic --disable-fortran
 
 STB_VER     = 1.22
-STB_DIR    = third_party/stb_vorbis-$(STB_VER)
+STB_DIR     = third_party/stb_vorbis-$(STB_VER)
 
 INCS        = -I$(SRCS_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
 LIBS        = $(FFTW_LIB) -lm
