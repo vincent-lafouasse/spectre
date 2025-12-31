@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 NAME        = spectre
 CC          = gcc
-CFLAGS      = -Wall -Wextra -Werror -std=c99 -O3
+C_VERSION   = c11
+CFLAGS      = -Wall -Wextra -Werror -std=$(C_VERSION) -O3
 RM          = rm -rf
 
 ROOT        = $(PWD)
