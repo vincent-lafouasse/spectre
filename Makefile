@@ -18,6 +18,10 @@ FFTW_CONFIG = --prefix=$(ROOT)/$(FFTW_INST) --enable-float --enable-neon --enabl
 STB_VER     = 1.22
 STB_DIR     = third_party/stb_vorbis-$(STB_VER)
 
+RAYLIB_VER  = 5.5
+RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
+RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
+
 INCS        = -I$(SRCS_DIR) -I$(FFTW_INST)/include -I$(STB_DIR)
 LIBS        = $(FFTW_LIB) -lm
 
@@ -27,7 +31,7 @@ OBJS        = $(SRCS:$(SRCS_DIR)/%.c=$(BUILD_DIR)/%.o)
 .PHONY: all
 all: $(NAME)
 
-$(NAME): $(FFTW_LIB) $(OBJS)
+$(NAME): $(RAYLIB_LIB) $(FFTW_LIB) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
 	@echo "\033[32mLinked $(NAME) successfully\033[0m"
 
@@ -50,14 +54,19 @@ $(FFTW_LIB):
 	@echo "\033[32mFFTW installed successfully.\033[0m"
 	$(RM) $(FFTW_DIR)/build_tmp
 
+$(RAYLIB_LIB):
+	RAYLIB_LIBTYPE=STATIC make -C $(RAYLIB_DIR)
+
 .PHONY: clean
 clean:
 	$(RM) $(BUILD_DIR)
+	make clean -C $(RAYLIB_DIR)
 	@echo "\033[31mRemoved object files\033[0m"
 
 .PHONY: fclean
 fclean: clean
 	$(RM) $(NAME)
+	$(RM) $(RAYLIB_LIB)
 	@echo "\033[31mRemoved $(NAME)\033[0m"
 
 # Clean everything including the FFTW build artifacts
