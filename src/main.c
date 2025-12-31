@@ -3,12 +3,20 @@
 
 #include <raylib.h>
 
-#define N 64
+#include "window/window.h"
+
+#define FFT_SIZE 1024
+
+#define STRIDE_RATIO 2
+#define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
 
 int main(void)
 {
     InitWindow(100, 100, "title");
     InitAudioDevice();
+
+    float window[FFT_SIZE];
+    make_hann_window(window, FFT_SIZE);
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
