@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <stdatomic.h>
+#include <string.h>
 
 #include <fftw3.h>
 #include <raylib.h>
@@ -20,27 +21,58 @@ float g_ring_buffer[BUFFER_SIZE];
 _Atomic size_t g_write_index = 0;
 _Atomic size_t g_read_index = 0;
 
-// producer (audio thread)
-void g_buffer_enqueue(float f)
+size_t g_buffer_available(void)
 {
-    const size_t write_idx =
-        atomic_load_explicit(&g_write_index, memory_order_relaxed);
-    g_ring_buffer[write_idx] = f;
+    size_t w = atomic_load_explicit(&g_write_index, memory_order_acquire);
+    size_t r = atomic_load_explicit(&g_read_index, memory_order_acquire);
 
-    const size_t next_write_idx = (write_idx + 1) & (BUFFER_SIZE - 1);
-    atomic_store_explicit(&g_write_index, next_write_idx, memory_order_release);
+    if (w >= r) {
+        return w - r;
+    } else {
+        return (BUFFER_SIZE - r) + w;
+    }
 }
 
 // consumer (fft thread)
-float g_buffer_dequeue(void)
+// returns false if not enough data is available
+bool g_buffer_pop(float* dest, size_t count)
 {
-    const size_t read_idx =
-        atomic_load_explicit(&g_read_index, memory_order_relaxed);
-    const float f = g_ring_buffer[read_idx];
+    if (g_buffer_available() < count)
+        return false;
 
-    const size_t next_read_idx = (read_idx + 1) % BUFFER_SIZE;
-    atomic_store_explicit(&g_read_index, next_read_idx, memory_order_release);
-    return f;
+    size_t r = atomic_load_explicit(&g_read_index, memory_order_relaxed);
+
+    for (size_t i = 0; i < count; i++) {
+        dest[i] = g_ring_buffer[r];
+        r = (r + 1) & (BUFFER_SIZE - 1);
+    }
+
+    atomic_store_explicit(&g_read_index, r, memory_order_release);
+    return true;
+}
+
+// producer (audio thread)
+void g_buffer_push_block(const float* samples, size_t count)
+{
+    const size_t w = atomic_load_explicit(&g_write_index, memory_order_relaxed);
+    const size_t available = g_buffer_available();
+
+    if (count > available) {
+        count = available;
+    }
+
+    // check if 1 or 2 memcpy are needed
+    size_t first_part = BUFFER_SIZE - w;
+    if (count <= first_part) {
+        memcpy(&g_ring_buffer[w], samples, count * sizeof(float));
+    } else {
+        memcpy(&g_ring_buffer[w], samples, first_part * sizeof(float));
+        memcpy(&g_ring_buffer[0], samples + first_part,
+               (count - first_part) * sizeof(float));
+    }
+
+    atomic_store_explicit(&g_write_index, (w + count) & (BUFFER_SIZE - 1),
+                          memory_order_release);
 }
 
 int main(void)
