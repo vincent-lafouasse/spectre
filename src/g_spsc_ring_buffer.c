@@ -3,9 +3,9 @@
 #include <stdatomic.h>
 #include <string.h>
 
-float g_ring_buffer[BUFFER_SIZE];
-_Atomic size_t g_write_index = 0;
-_Atomic size_t g_read_index = 0;
+static float g_ring_buffer[BUFFER_SIZE];
+static _Atomic size_t g_write_index = 0;
+static _Atomic size_t g_read_index = 0;
 
 size_t g_buffer_available(void)
 {
