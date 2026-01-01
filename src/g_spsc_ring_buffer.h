@@ -4,6 +4,8 @@
 #include <stddef.h>
 
 #include "definitions.h"
+// check that atomic u32s are lock-free
+#include "platform_check.h"
 
 #define BUFFER_SIZE (8 * FFT_SIZE)
 
