@@ -9,8 +9,8 @@ static _Atomic size_t g_read_index = 0;
 
 size_t g_buffer_available(void)
 {
-    size_t w = atomic_load_explicit(&g_write_index, memory_order_acquire);
-    size_t r = atomic_load_explicit(&g_read_index, memory_order_acquire);
+    const size_t w = atomic_load_explicit(&g_write_index, memory_order_acquire);
+    const size_t r = atomic_load_explicit(&g_read_index, memory_order_acquire);
 
     if (w >= r) {
         return w - r;
@@ -48,7 +48,7 @@ void g_buffer_push_block(const float* samples, size_t count)
     }
 
     // check if 1 or 2 memcpy are needed
-    size_t first_part = BUFFER_SIZE - w;
+    const size_t first_part = BUFFER_SIZE - w;
     if (count <= first_part) {
         memcpy(&g_ring_buffer[w], samples, count * sizeof(float));
     } else {
