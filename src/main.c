@@ -5,9 +5,8 @@
 #include <fftw3.h>
 #include <raylib.h>
 
+#include "definitions.h"
 #include "window/window.h"
-
-#define FFT_SIZE 1024
 
 #define STRIDE_RATIO 2
 #define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
