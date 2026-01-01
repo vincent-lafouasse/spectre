@@ -1,5 +1,5 @@
 // Matplotlib inferno colormap
-float inferno_data[256][4] = {
+float inferno_rgba[256][4] = {
     {0.001462f, 0.000466f, 0.013866f, 1.000000f},
     {0.002267f, 0.001270f, 0.018570f, 1.000000f},
     {0.003299f, 0.002249f, 0.024239f, 1.000000f},

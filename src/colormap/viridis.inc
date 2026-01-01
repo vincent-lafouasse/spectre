@@ -1,5 +1,5 @@
 // Matplotlib viridis colormap
-float viridis_data[256][4] = {
+float viridis_rgba[256][4] = {
     {0.267004f, 0.004874f, 0.329415f, 1.000000f},
     {0.268510f, 0.009605f, 0.335427f, 1.000000f},
     {0.269944f, 0.014625f, 0.341379f, 1.000000f},

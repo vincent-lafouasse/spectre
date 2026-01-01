@@ -9,7 +9,7 @@ def dump(cmap_name, n_colors=256):
 
     with open(f"{cmap_name}.inc", "w") as f:
         f.write(f"// Matplotlib {cmap_name} colormap\n")
-        f.write(f"float {cmap_name}_data[{n_colors}][4] = {{\n")
+        f.write(f"float {cmap_name}_rgba[{n_colors}][4] = {{\n")
         for r, g, b, a in colors:
             f.write(f"    {{{r:.6f}f, {g:.6f}f, {b:.6f}f, {a:.6f}f}},\n")
         f.write("};\n")
