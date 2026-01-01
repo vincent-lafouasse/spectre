@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include <string.h>
-
 #include <fftw3.h>
 #include <raylib.h>
 
