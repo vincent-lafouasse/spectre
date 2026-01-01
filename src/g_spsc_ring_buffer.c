@@ -28,6 +28,7 @@ bool g_buffer_pop(float* dest, size_t count)
 
     size_t r = atomic_load_explicit(&g_read_index, memory_order_relaxed);
 
+    // might do 2 memcpy like buffer_push
     for (size_t i = 0; i < count; i++) {
         dest[i] = g_ring_buffer[r];
         r = (r + 1) & (BUFFER_SIZE - 1);
