@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 #include "definitions.h"
-#include "window/window.h"
+#include "dsp/window.h"
 
 #define STRIDE_RATIO 2
 #define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
