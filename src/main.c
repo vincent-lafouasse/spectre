@@ -15,6 +15,11 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
+#define ALERT_FRACTION 10
+// if ALERT_FRACTION is 10, alert at 10% and 90% fullness
+#define UNDERFULL_ALERT (CLF_QUEUE_SIZE / ALERT_FRACTION)
+#define ALMOSTFULL_ALERT ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
+
 int main(void)
 {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
