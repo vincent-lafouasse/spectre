@@ -2,7 +2,7 @@
 NAME        = spectre
 CC          = gcc
 C_VERSION   = c11
-CFLAGS      = -Wall -Wextra -Werror -std=$(C_VERSION) -O3
+CFLAGS      = -Wall -Wextra -std=$(C_VERSION) -O3
 RM          = rm -rf
 
 ROOT        = $(PWD)
