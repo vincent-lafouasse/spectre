@@ -20,6 +20,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+// project specific
+// sets the queue size to a multiple of the FFT size
+#include "definitions.h"
+// \project specific
+
 // prevents false sharing on M-series CPU
 // harmless padding on 64B systems
 #define CACHE_LINE 128
