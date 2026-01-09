@@ -2,7 +2,7 @@
 
 static LockFreeQueueProducer* sample_tx = NULL;
 
-void pull_samples_from_audio_thread(void *buffer, unsigned int frames)
+void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 {
     if (sample_tx == NULL) {
         return;

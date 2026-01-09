@@ -69,9 +69,9 @@ static SizeType min(SizeType a, SizeType b)
 }
 
 SizeType clfq_push_partial(LockFreeQueueProducer* restrict producer,
-                         const float* restrict elems,
-                         SizeType n,
-                         SizeType frame_size)
+                           const float* restrict elems,
+                           SizeType n,
+                           SizeType frame_size)
 {
     const SizeType available = clfq_producer_size_eager(producer);
     const SizeType maximum_n = min(n, available);
@@ -134,9 +134,9 @@ bool clfq_pop(LockFreeQueueConsumer* restrict consumer,
 }
 
 SizeType clfq_pop_partial(LockFreeQueueConsumer* restrict consumer,
-                        float* restrict elems,
-                        SizeType n,
-                        SizeType frame_size)
+                          float* restrict elems,
+                          SizeType n,
+                          SizeType frame_size)
 {
     const SizeType available = clfq_consumer_size_eager(consumer);
     const SizeType maximum_n = min(n, available);
@@ -151,7 +151,7 @@ SizeType clfq_pop_partial(LockFreeQueueConsumer* restrict consumer,
 }
 
 SizeType clfq_consumer_peek_lazy(const LockFreeQueueConsumer* restrict consumer,
-                               const float** restrict ptr)
+                                 const float** restrict ptr)
 {
     const SizeType available = clfq_consumer_size_lazy(consumer);
     const SizeType front =
@@ -171,7 +171,7 @@ SizeType clfq_consumer_peek_lazy(const LockFreeQueueConsumer* restrict consumer,
 
 // same but with a fresh cache
 SizeType clfq_consumer_peek_eager(LockFreeQueueConsumer* restrict consumer,
-                                const float** restrict ptr)
+                                  const float** restrict ptr)
 {
     consumer->cached_back =
         atomic_load_explicit(consumer->back, memory_order_acquire);

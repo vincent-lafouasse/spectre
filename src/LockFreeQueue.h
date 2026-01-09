@@ -77,7 +77,8 @@ LockFreeQueueProducer clfq_producer(LockFreeQueue* restrict clfq);
 
 // pessimistic estimate using cached `front`. no atomic load at all
 // there might be more available
-SizeType clfq_producer_size_lazy(const LockFreeQueueProducer* restrict producer);
+SizeType clfq_producer_size_lazy(
+    const LockFreeQueueProducer* restrict producer);
 
 // loads `front` with `acquire` ordering and updates `cached_front`
 SizeType clfq_producer_size_eager(LockFreeQueueProducer* restrict producer);
@@ -94,9 +95,9 @@ bool clfq_push(LockFreeQueueProducer* restrict producer,
 // will only commit a multiple of frame_size as not to tear frames
 // e.g. to preserve interleaved LR stereo frames, pass frame_size=2
 SizeType clfq_push_partial(LockFreeQueueProducer* restrict producer,
-                         const float* restrict elems,
-                         SizeType n,
-                         SizeType frame_size);
+                           const float* restrict elems,
+                           SizeType n,
+                           SizeType frame_size);
 
 // -------------------- Consumer API --------------------
 // the API (and implementation) is pretty much symmetric, see Producer for info
@@ -110,16 +111,17 @@ struct LockFreeQueueConsumer {
 
 LockFreeQueueConsumer clfq_consumer(LockFreeQueue* restrict clfq);
 
-SizeType clfq_consumer_size_lazy(const LockFreeQueueConsumer* restrict consumer);
+SizeType clfq_consumer_size_lazy(
+    const LockFreeQueueConsumer* restrict consumer);
 SizeType clfq_consumer_size_eager(LockFreeQueueConsumer* restrict consumer);
 
 bool clfq_pop(LockFreeQueueConsumer* restrict consumer,
               float* restrict elems,
               SizeType n);
 SizeType clfq_pop_partial(LockFreeQueueConsumer* restrict consumer,
-                        float* restrict elems,
-                        SizeType n,
-                        SizeType frame_size);
+                          float* restrict elems,
+                          SizeType n,
+                          SizeType frame_size);
 
 // peek returns a pointer to a contiguous slice of unread elements.
 // The returned pointer remains valid until the next call that advances the
@@ -132,12 +134,12 @@ SizeType clfq_pop_partial(LockFreeQueueConsumer* restrict consumer,
 // Returns size of contiguous slice available using cached_back
 // no load is performed
 SizeType clfq_consumer_peek_lazy(const LockFreeQueueConsumer* restrict consumer,
-                               const float** restrict ptr);
+                                 const float** restrict ptr);
 
 // Updates cached_back then returns contiguous slice size.
 // `back` is loaded with `acquire` ordering
 SizeType clfq_consumer_peek_eager(LockFreeQueueConsumer* restrict consumer,
-                                const float** restrict ptr);
+                                  const float** restrict ptr);
 
 // unsafe, will cross the write end if not careful
 // meant to be called after peek to consume data that we know is there
