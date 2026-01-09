@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include <fftw3.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <raylib.h>
 
-#include "definitions.h"
-#include "dsp/window.h"
+#include "LockFreeQueue.h"
+#include "audio_callback.h"
 
+/*
 #define STRIDE_RATIO 2
 #define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
+*/
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -16,12 +20,18 @@ int main(void)
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
     InitAudioDevice();
 
-    float* in = fftwf_alloc_real(FFT_SIZE);
-    fftwf_complex* out = fftwf_alloc_complex(FFT_SIZE);
-    fftwf_plan p = fftwf_plan_dft_r2c_1d(FFT_SIZE, in, out, FFTW_MEASURE);
+    LockFreeQueue* sample_queue = malloc(sizeof(*sample_queue));
+    if (sample_queue == NULL) {
+        printf("oom\n");
+        exit(1);
+    }
+    clfq_new(sample_queue);
 
-    float window[FFT_SIZE];
-    make_hann_window(window, FFT_SIZE);
+    LockFreeQueueProducer sample_tx = clfq_producer(sample_queue);
+    pass_sample_tx(&sample_tx);
+
+    LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
+    (void)sample_rx;
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
@@ -34,9 +44,7 @@ int main(void)
         EndDrawing();
     }
 
-    fftwf_destroy_plan(p);
-    fftwf_free(in);
-    fftwf_free(out);
+    free(sample_queue);
     UnloadSound(sound);
     CloseAudioDevice();
     CloseWindow();
