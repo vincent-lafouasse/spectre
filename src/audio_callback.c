@@ -11,7 +11,7 @@ void pass_sample_tx(LockFreeQueueProducer* sample_tx_passed)
 
 void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 {
-    assert (sample_tx != NULL);
+    assert(sample_tx != NULL);
 
     (void)buffer;
     (void)frames;
