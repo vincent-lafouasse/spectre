@@ -1,5 +1,7 @@
 #include "audio_callback.h"
 
+#include <assert.h>
+
 static LockFreeQueueProducer* sample_tx = NULL;
 
 void pass_sample_tx(LockFreeQueueProducer* sample_tx_passed)
@@ -9,9 +11,7 @@ void pass_sample_tx(LockFreeQueueProducer* sample_tx_passed)
 
 void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 {
-    if (sample_tx == NULL) {
-        return;
-    }
+    assert (sample_tx != NULL);
 
     (void)buffer;
     (void)frames;
