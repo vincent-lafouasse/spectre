@@ -160,8 +160,13 @@ int main(void)
     History rms_history = history_new();
     float rms_buffer[RMS_SIZE] = {0};
 
-    Sound sound = LoadSound("audio/an_idea.mp3");
-    PlaySound(sound);
+    const char* music_path = "audio/an_idea.mp3";
+    Music music = LoadMusicStream(music_path);
+    if (!IsMusicValid(music)) {
+        printf("Failed to open %s\n", music_path);
+        exit(1);
+    }
+    PlayMusicStream(music);
 
     SetTargetFPS(60);
 
@@ -193,7 +198,7 @@ int main(void)
 
     free(sample_queue);
     deinit_audio_processor();
-    UnloadSound(sound);
+    UnloadMusicStream(music);
     CloseAudioDevice();
     CloseWindow();
 }
