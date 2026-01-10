@@ -34,7 +34,7 @@ int main(void)
     clfq_new(sample_queue);
 
     LockFreeQueueProducer sample_tx = clfq_producer(sample_queue);
-    pass_sample_tx(&sample_tx);
+    init_audio_processor(&sample_tx);
 
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
@@ -51,6 +51,7 @@ int main(void)
     }
 
     free(sample_queue);
+    deinit_audio_processor();
     UnloadSound(sound);
     CloseAudioDevice();
     CloseWindow();
