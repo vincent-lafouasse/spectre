@@ -85,7 +85,7 @@ SplitSlice history_get(const History* h)
 #define RMS_SIZE 1024
 #define RMS_STRIDE (RMS_SIZE / 2)
 
-float rms(const float* data, SizeType size)
+float rms(const float* restrict data, SizeType size)
 {
     float sum = 0;
 
