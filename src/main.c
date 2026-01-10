@@ -16,6 +16,8 @@
 
 #define PIXEL_PER_BAND 4
 
+#define HISTORY_SIZE 1024
+
 float clamp_unit(float f)
 {
     return fminf(fmaxf(f, 0.0f), 1.0f);
@@ -164,7 +166,7 @@ int main(int ac, const char** av)
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
 
-    FloatHistory rms_history = fhistory_new(1024);
+    FloatHistory rms_history = fhistory_new(HISTORY_SIZE);
     float rms_buffer[RMS_SIZE] = {0};
 
     // make a 1 x history_size texture that we will stretch later
