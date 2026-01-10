@@ -95,6 +95,45 @@ float rms(const float* restrict data, SizeType size)
     return sqrtf(sum / (float)size);
 }
 
+typedef struct {
+    Texture2D texture;
+    SizeType last_processed_i;
+    float height, width;
+    Vector2 origin;
+    SizeType size;
+} RMSVisualizer;
+
+RMSVisualizer rms_vis_new(SizeType size, float w, float h, Vector2 origin)
+{
+    Image img = GenImageColor(size, 1, BLACK);
+    Texture2D texture = LoadTextureFromImage(img);
+    UnloadImage(img);
+    SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
+
+    return (RMSVisualizer){
+        .texture = texture,
+        .last_processed_i = 0,
+        .height = h,
+        .width = w,
+        .origin = origin,
+        .size = size,
+    };
+}
+
+void rms_vis_destroy(RMSVisualizer* rv)
+{
+    if (!rv) {
+        return;
+    }
+
+    UnloadTexture(rv->texture);
+}
+
+// called after processing and before drawing block
+void rms_vis_update(FloatHistory* rms_history);
+// draw call
+void rms_vis_render(/* ... */);
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
