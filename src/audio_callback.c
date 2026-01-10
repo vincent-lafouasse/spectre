@@ -34,7 +34,7 @@ void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
             frames <= MONO_BUFFER_SIZE ? frames : MONO_BUFFER_SIZE;
 
         for (SizeType i = 0; i < to_pull; i++) {
-            mono_buffer[start + i] =
+            mono_buffer[i] =
                 0.5 * (samples[start + 2 * i] + samples[start + 2 * i + 1]);
         }
 
