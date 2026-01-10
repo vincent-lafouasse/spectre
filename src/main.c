@@ -110,6 +110,7 @@ int main(void)
 
     LockFreeQueueProducer sample_tx = clfq_producer(sample_queue);
     init_audio_processor(&sample_tx);
+    AttachAudioMixedProcessor(pull_samples_from_audio_thread);
 
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
@@ -119,16 +120,17 @@ int main(void)
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
-    AttachAudioMixedProcessor(pull_samples_from_audio_thread);
 
     SetTargetFPS(60);
 
+    SizeType frame_counter = 0;
     while (!WindowShouldClose()) {
         const SizeType available = clfq_consumer_size_eager(&sample_rx);
         if (available < UNDERFULL_ALERT) {
-            printf("oops, buffer underfull: %u\n", available);
+            printf("frame %u buffer underfull: %u\n", frame_counter, available);
         } else if (available > ALMOSTFULL_ALERT) {
-            printf("oops, buffer almost full: %u\n", available);
+            printf("frame %u buffer almost full: %u\n", frame_counter,
+                   available);
         }
 
         while (clfq_pop(&sample_rx, rms_buffer + RMS_STRIDE, RMS_STRIDE)) {
@@ -142,6 +144,8 @@ int main(void)
         BeginDrawing();
         ClearBackground(RAYWHITE);
         EndDrawing();
+
+        frame_counter++;
     }
 
     free(sample_queue);
