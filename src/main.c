@@ -106,7 +106,8 @@ Color float_to_color(float f, const float (*const cmap)[4])
 void render_band(SizeType band, float value, Color color)
 {
     const int height = (int)(value * WINDOW_HEIGHT);
-    DrawRectangle(PIXEL_PER_BAND * band, 0, PIXEL_PER_BAND, height, color);
+    DrawRectangle(PIXEL_PER_BAND * band, WINDOW_HEIGHT - height, PIXEL_PER_BAND,
+                  WINDOW_HEIGHT, color);
 }
 
 void history_render(const History* h)
