@@ -84,36 +84,46 @@ Color color_from_floats(const float color[4])
                    .a = (unsigned char)(color[3] * 255.0f)};
 }
 
+float clamp_float_exlusive(float f, float min_value, float max_value)
+{
+    if (f < min_value) {
+        return min_value;
+    } else if (f >= max_value) {
+        return nextafter(max_value, min_value);
+    } else {
+        return f;
+    }
+}
+
+// expected in [0.0, 1.0[ but will be clamped
+Color float_to_color(float f, const float (*const cmap)[4])
+{
+    const float clamped = clamp_float_exlusive(f, 0.0f, 1.0f);
+    const int color_index = (int)(clamped * COLORMAP_SIZE);
+    return color_from_floats(cmap[color_index]);
+}
+
+void render_band(SizeType band, float value, Color color)
+{
+    const int height = (int)(value * WINDOW_HEIGHT);
+    DrawRectangle(PIXEL_PER_BAND * band, 0, PIXEL_PER_BAND, height, color);
+}
+
 void history_render(const History* h)
 {
     const SplitSlice data = history_get(h);
-    const float just_below_1 = nextafterf(1.0f, 0.0f);
+    const float(*const cmap)[4] = plasma_rgba;
 
     for (SizeType i = 0; i < data.size1; i++) {
-        float raw_value = data.slice1[i];
-        raw_value = (raw_value < 0.0f) ? 0.0f : raw_value;
-        raw_value = (raw_value >= 1.0f) ? just_below_1 : raw_value;
-        const float value = raw_value;
-
-        const int height = (int)(value * WINDOW_HEIGHT);
-        const int color_index = (int)(value * COLORMAP_SIZE);
-        const Color color = color_from_floats(viridis_rgba[color_index]);
-
-        DrawRectangle(PIXEL_PER_BAND * i, 0, PIXEL_PER_BAND, height, color);
+        const float value = clamp_float_exlusive(data.slice1[i], 0.0f, 1.0f);
+        const Color color = float_to_color(value, cmap);
+        render_band(i, value, color);
     }
 
     for (SizeType i = 0; i < data.size2; i++) {
-        float raw_value = data.slice2[i];
-        raw_value = (raw_value < 0.0f) ? 0.0f : raw_value;
-        raw_value = (raw_value >= 1.0f) ? just_below_1 : raw_value;
-        const float value = raw_value;
-
-        const int height = (int)(value * WINDOW_HEIGHT);
-        const int color_index = (int)(value * COLORMAP_SIZE);
-        const Color color = color_from_floats(viridis_rgba[color_index]);
-
-        DrawRectangle(PIXEL_PER_BAND * (data.size1 + i), 0, PIXEL_PER_BAND,
-                      height, color);
+        const float value = clamp_float_exlusive(data.slice2[i], 0.0f, 1.0f);
+        const Color color = float_to_color(value, cmap);
+        render_band(data.size1 + i, value, color);
     }
 }
 
