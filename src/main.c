@@ -22,10 +22,12 @@ float clamp_unit(float f)
 }
 
 // expected in [0.0, 1.0[ but will be clamped
-Color float_to_color(float intensity, const uint8_t (*const cmap)[4])
+Color float_to_color(float intensity,
+                     const uint8_t (*const cmap)[4],
+                     SizeType cmap_size)
 {
     const float clamped = clamp_unit(intensity);
-    const int index = (int)(clamped * (COLORMAP_SIZE - 0.0001f));
+    const int index = (int)(clamped * (cmap_size - 0.0001f));
     return *(Color*)cmap[index];
 }
 
@@ -43,13 +45,13 @@ void rms_history_render(const FloatHistory* rms_history)
 
     for (SizeType i = 0; i < rms_values.size1; i++) {
         const float power = clamp_unit(rms_values.slice1[i]);
-        const Color color = float_to_color(power, cmap);
+        const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
         render_band(i, power, color);
     }
 
     for (SizeType i = 0; i < rms_values.size2; i++) {
         const float power = clamp_unit(rms_values.slice2[i]);
-        const Color color = float_to_color(power, cmap);
+        const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
         render_band(rms_values.size1 + i, power, color);
     }
 }
