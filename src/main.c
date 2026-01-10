@@ -98,6 +98,37 @@ float rms(const float* restrict data, SizeType size)
 }
 
 typedef struct {
+    float buffer[RMS_SIZE];
+    SizeType size;
+    SizeType stride;
+    LockFreeQueueConsumer rx;
+    FloatHistory history;
+} RMSAnalyzer;
+
+RMSAnalyzer rms_ana_new(LockFreeQueueConsumer sample_rx)
+{
+    return (RMSAnalyzer){
+        .buffer = {0},
+        .size = RMS_SIZE,
+        .stride = RMS_STRIDE,
+        .rx = sample_rx,
+        .history = fhistory_new(HISTORY_SIZE),
+    };
+}
+
+void rms_ana_destroy(RMSAnalyzer* analyzer)
+{
+    if (!analyzer) {
+        return;
+    }
+
+    fhistory_destroy(analyzer->history);
+}
+
+// returns number of elements pushed onto its history
+SizeType rms_ana_update(RMSAnalyzer* analyzer);
+
+typedef struct {
     Texture2D texture;
     SizeType last_syncd_tail;
     float height, width;
