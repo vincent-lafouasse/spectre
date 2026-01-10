@@ -138,8 +138,14 @@ float rms(const float* restrict data, SizeType size)
     return sqrtf(sum);
 }
 
-int main(void)
+int main(int ac, const char** av)
 {
+    if (ac != 2) {
+        printf("Usage: spectre [audio_file]\n");
+        exit(1);
+    }
+    const char* music_path = av[1];
+
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
     InitAudioDevice();
 
@@ -160,7 +166,6 @@ int main(void)
     History rms_history = history_new();
     float rms_buffer[RMS_SIZE] = {0};
 
-    const char* music_path = "audio/an_idea.mp3";
     Music music = LoadMusicStream(music_path);
     if (!IsMusicValid(music)) {
         printf("Failed to open %s\n", music_path);
