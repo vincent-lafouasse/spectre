@@ -16,14 +16,6 @@
 
 #define PIXEL_PER_BAND 4
 
-Color color_from_floats(const float color[4])
-{
-    return (Color){.r = (unsigned char)(color[0] * 255.0f),
-                   .g = (unsigned char)(color[1] * 255.0f),
-                   .b = (unsigned char)(color[2] * 255.0f),
-                   .a = (unsigned char)(color[3] * 255.0f)};
-}
-
 float clamp_float_exlusive(float f, float min_value, float max_value)
 {
     if (f < min_value) {
@@ -36,11 +28,11 @@ float clamp_float_exlusive(float f, float min_value, float max_value)
 }
 
 // expected in [0.0, 1.0[ but will be clamped
-Color float_to_color(float f, const float (*const cmap)[4])
+Color float_to_color(float f, const uint8_t (*const cmap)[4])
 {
     const float clamped = clamp_float_exlusive(f, 0.0f, 1.0f);
-    const int color_index = (int)(clamped * COLORMAP_SIZE);
-    return color_from_floats(cmap[color_index]);
+    const int index = (int)(clamped * COLORMAP_SIZE);
+    return *(Color*)cmap[index];
 }
 
 void render_band(SizeType band, float value, Color color)
@@ -53,7 +45,7 @@ void render_band(SizeType band, float value, Color color)
 void rms_history_render(const FloatHistory* rms_history)
 {
     const SplitSlice rms_values = fhistory_get(rms_history);
-    const float(*const cmap)[4] = plasma_rgba;
+    const uint8_t(*const cmap)[4] = plasma_rgba;
 
     for (SizeType i = 0; i < rms_values.size1; i++) {
         const float value =
