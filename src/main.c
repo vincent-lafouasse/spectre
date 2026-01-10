@@ -16,22 +16,16 @@
 
 #define PIXEL_PER_BAND 4
 
-float clamp_float_exlusive(float f, float min_value, float max_value)
+float clamp_unit(float f)
 {
-    if (f < min_value) {
-        return min_value;
-    } else if (f >= max_value) {
-        return nextafter(max_value, min_value);
-    } else {
-        return f;
-    }
+    return (f < 0.0f) ? 0.0f : (f > 1.0f) ? 1.0f : f;
 }
 
 // expected in [0.0, 1.0[ but will be clamped
-Color float_to_color(float f, const uint8_t (*const cmap)[4])
+Color float_to_color(float intensity, const uint8_t (*const cmap)[4])
 {
-    const float clamped = clamp_float_exlusive(f, 0.0f, 1.0f);
-    const int index = (int)(clamped * COLORMAP_SIZE);
+    const float clamped = clamp_unit(intensity);
+    const int index = (int)(clamped * (COLORMAP_SIZE - 0.0001f));
     return *(Color*)cmap[index];
 }
 
@@ -48,17 +42,15 @@ void rms_history_render(const FloatHistory* rms_history)
     const uint8_t(*const cmap)[4] = plasma_rgba;
 
     for (SizeType i = 0; i < rms_values.size1; i++) {
-        const float value =
-            clamp_float_exlusive(rms_values.slice1[i], 0.0f, 1.0f);
-        const Color color = float_to_color(value, cmap);
-        render_band(i, value, color);
+        const float power = clamp_unit(rms_values.slice1[i]);
+        const Color color = float_to_color(power, cmap);
+        render_band(i, power, color);
     }
 
     for (SizeType i = 0; i < rms_values.size2; i++) {
-        const float value =
-            clamp_float_exlusive(rms_values.slice2[i], 0.0f, 1.0f);
-        const Color color = float_to_color(value, cmap);
-        render_band(rms_values.size1 + i, value, color);
+        const float power = clamp_unit(rms_values.slice2[i]);
+        const Color color = float_to_color(power, cmap);
+        render_band(rms_values.size1 + i, power, color);
     }
 }
 
