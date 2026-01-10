@@ -54,10 +54,18 @@ int main(void)
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
+    AttachAudioMixedProcessor(pull_samples_from_audio_thread);
 
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
+        const SizeType available = clfq_consumer_size_eager(&sample_rx);
+        if (available < UNDERFULL_ALERT) {
+            printf("oops, buffer underfull: %u\n", available);
+        } else if (available > ALMOSTFULL_ALERT) {
+            printf("oops, buffer almost full: %u\n", available);
+        }
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
         EndDrawing();
