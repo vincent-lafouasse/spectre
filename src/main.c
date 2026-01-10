@@ -17,9 +17,14 @@
 #define PIXEL_PER_BAND 4
 #define HISTORY_SIZE (WINDOW_WIDTH / PIXEL_PER_BAND)
 
-typedef struct History {
+// keep a history of computed values for displaying
+// a circular buffer that overwrites its oldest data
+//
+// payload is `float rms` for now but will be `float fft[]` later
+typedef struct {
     float data[HISTORY_SIZE];
     SizeType head;  // always point to the oldest sample
+    SizeType tail;  // the next position to write to. can be equal to head
     SizeType len;
 } History;
 
@@ -30,9 +35,47 @@ History history_new(void)
 
 void history_push(History* h, float f)
 {
-    h->data[h->head] = f;
-    h->head += 1;
-    h->head %= HISTORY_SIZE;
+    h->data[h->tail] = f;
+    const SizeType new_tail = (h->tail + 1) % HISTORY_SIZE;
+    h->tail = new_tail;
+    if (h->len == HISTORY_SIZE) {
+        h->head = h->tail;
+    } else {
+        h->len += 1;
+    }
+}
+
+// one or two slices
+typedef struct {
+    const float* slice1;
+    SizeType size1;
+    const float* slice2;
+    SizeType size2;
+} SplitSlice;
+
+SplitSlice history_get(const History* h)
+{
+    // might be off the buffer
+    const SizeType end = h->head + h->len;
+
+    if (end <= HISTORY_SIZE) {
+        return (SplitSlice){
+            .slice1 = h->data + h->head,
+            .size1 = h->len,
+            .slice2 = NULL,
+            .size2 = 0,
+        };
+    }
+
+    const SizeType size1 = HISTORY_SIZE - h->head;
+    const SizeType size2 = h->len - size1;
+
+    return (SplitSlice){
+        .slice1 = h->data + h->head,
+        .size1 = size1,
+        .slice2 = h->data,
+        .size2 = size2,
+    };
 }
 
 #define ALERT_FRACTION 10
