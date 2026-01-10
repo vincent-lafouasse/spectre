@@ -29,7 +29,7 @@ SizeType clfq_producer_size_lazy(const LockFreeQueueProducer* restrict producer)
 {
     const SizeType back =
         atomic_load_explicit(producer->back, memory_order_relaxed);
-    return distance(back, producer->cached_front + CLF_QUEUE_SIZE);
+    return CLF_QUEUE_SIZE - (back - producer->cached_front);
 }
 
 SizeType clfq_producer_size_eager(LockFreeQueueProducer* restrict producer)
