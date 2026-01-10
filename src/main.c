@@ -140,7 +140,7 @@ int main(int ac, const char** av)
         }
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
         rms_history_render(&rms_history);
         EndDrawing();
 
