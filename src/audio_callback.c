@@ -2,9 +2,11 @@
 
 #include <assert.h>
 #include <stdatomic.h>
+#include <stdio.h>  // bad bad bad bad bad bad
 #include <stdlib.h>
 
 #include "LockFreeQueue.h"
+#include "definitions.h"
 
 #define MONO_BUFFER_SIZE 1024
 
@@ -22,6 +24,9 @@ void deinit_audio_processor(void) {}
 // always interleaved stereo
 void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 {
+    static SizeType counter = 0;
+    printf("audio callback numero %u\n", counter++);
+
     LockFreeQueueProducer* restrict sample_tx =
         atomic_load_explicit(&s_sample_tx, memory_order_acquire);
     assert(sample_tx != NULL);
@@ -40,10 +45,13 @@ void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 
         const SizeType transmitted =
             clfq_push_partial(sample_tx, mono_buffer, to_pull, 1);
+        printf("transmitted %u samples from audio thread\n", transmitted);
         if (transmitted < to_pull) {
             break;
         }
         start += transmitted;
         frames -= transmitted;
     }
+    // printf("queue size at end of callback %u\n", CLF_QUEUE_SIZE -
+    // clfq_producer_size_eager(sample_tx));
 }
