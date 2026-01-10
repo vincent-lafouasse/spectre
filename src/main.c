@@ -30,31 +30,6 @@ Color float_to_color(float intensity,
     return *(Color*)cmap[index];
 }
 
-void render_band(SizeType band, float value, Color color)
-{
-    const int height = (int)(value * WINDOW_HEIGHT);
-    DrawRectangle(PIXEL_PER_BAND * band, WINDOW_HEIGHT - height, PIXEL_PER_BAND,
-                  WINDOW_HEIGHT - 1, color);
-}
-
-void rms_history_render(const FloatHistory* rms_history)
-{
-    const SplitSlice rms_values = fhistory_get(rms_history);
-    const uint8_t(*const cmap)[4] = plasma_rgba;
-
-    for (SizeType i = 0; i < rms_values.size1; i++) {
-        const float power = clamp_unit(rms_values.slice1[i]);
-        const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
-        render_band(i, power, color);
-    }
-
-    for (SizeType i = 0; i < rms_values.size2; i++) {
-        const float power = clamp_unit(rms_values.slice2[i]);
-        const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
-        render_band(rms_values.size1 + i, power, color);
-    }
-}
-
 // update the single pixel that just changed in the circular buffer
 void rms_history_update_texture(const FloatHistory* fh, Texture2D tex)
 {
@@ -66,6 +41,33 @@ void rms_history_update_texture(const FloatHistory* fh, Texture2D tex)
     const Color* pixels = &color;  // 1 pixel
 
     UpdateTextureRec(tex, (Rectangle){(float)latest, 0, 1, 1}, pixels);
+}
+
+void rms_history_render_texture(Texture2D tex, const FloatHistory* fh)
+{
+    float band_width = (float)WINDOW_WIDTH / fh->cap;
+
+    for (SizeType i = 0; i < fh->cap; i++) {
+        if (fh->len < fh->cap && i >= fh->tail) {
+            break;
+        }
+
+        // stretch this
+        const Rectangle src = {(float)i, 0, 1, 1};
+
+        // to this
+        const Rectangle dest = {
+            i * band_width,
+            0,
+            band_width,
+            clamp_unit(fh->data[i]) * WINDOW_HEIGHT,
+        };
+
+        const Vector2 origin = {0, 0};
+        const float angle = 0.0f;
+        const Color tint = WHITE;  // no tint
+        DrawTexturePro(tex, src, dest, origin, angle, tint);
+    }
 }
 
 #define ALERT_FRACTION 16
@@ -150,6 +152,7 @@ int main(int ac, const char** av)
         while (clfq_pop(&sample_rx, rms_buffer + RMS_STRIDE, RMS_STRIDE)) {
             const float rms_value = rms(rms_buffer, RMS_SIZE);
             fhistory_push(&rms_history, rms_value);
+            rms_history_update_texture(&rms_history, rms_tex);
 
             // move old data backward
             memmove(rms_buffer, rms_buffer + RMS_STRIDE, RMS_STRIDE);
@@ -157,7 +160,7 @@ int main(int ac, const char** av)
 
         BeginDrawing();
         ClearBackground(BLACK);
-        rms_history_render(&rms_history);
+        rms_history_render_texture(rms_tex, &rms_history);
         EndDrawing();
 
         frame_counter++;
