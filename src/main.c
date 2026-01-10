@@ -177,6 +177,8 @@ int main(int ac, const char** av)
 
     SizeType frame_counter = 0;
     while (!WindowShouldClose()) {
+        UpdateMusicStream(music);
+
         const SizeType available = clfq_consumer_size_eager(&sample_rx);
         if (available < UNDERFULL_ALERT) {
             printf("frame %u buffer underfull: %u\n", frame_counter, available);
