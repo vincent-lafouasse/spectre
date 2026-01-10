@@ -14,6 +14,27 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
+#define PIXEL_PER_BAND 4
+#define HISTORY_SIZE (WINDOW_WIDTH / PIXEL_PER_BAND)
+
+typedef struct History {
+    float data[HISTORY_SIZE];
+    SizeType head;  // always point to the oldest sample
+    SizeType len;
+} History;
+
+History history_new(void)
+{
+    return (History){0};
+}
+
+void history_push(History* h, float f)
+{
+    h->data[h->head] = f;
+    h->head += 1;
+    h->head %= HISTORY_SIZE;
+}
+
 #define ALERT_FRACTION 10
 // if ALERT_FRACTION is 10, alert at 10% and 90% fullness
 #define UNDERFULL_ALERT (CLF_QUEUE_SIZE / ALERT_FRACTION)
