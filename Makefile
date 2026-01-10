@@ -58,7 +58,7 @@ $(RAYLIB_LIB):
 
 .PHONY: clean
 clean:
-	$(RM) $(BUILD_DIR)/**/*.o
+	$(RM) $(OBJS)
 	@echo "\033[31mRemoved object files\033[0m"
 
 .PHONY: fclean
