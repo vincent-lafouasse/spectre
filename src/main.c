@@ -56,11 +56,16 @@ void rms_history_render_texture(Texture2D tex, const FloatHistory* fh)
         const Rectangle src = {(float)i, 0, 1, 1};
 
         // to this
-        const Rectangle dest = {
+        const float height = clamp_unit(fh->data[i]) * WINDOW_HEIGHT;
+        const Vector2 corner = {
             i * band_width,
-            0,
+            0.5f * (WINDOW_HEIGHT - height),
+        };
+        const Rectangle dest = {
+            corner.x,
+            corner.y,
             band_width,
-            clamp_unit(fh->data[i]) * WINDOW_HEIGHT,
+            height,
         };
 
         const Vector2 origin = {0, 0};
