@@ -40,7 +40,7 @@ void render_band(SizeType band, float value, Color color)
 void rms_history_render(const FloatHistory* rms_history)
 {
     const SplitSlice rms_values = fhistory_get(rms_history);
-    const uint8_t (*const cmap)[4] = plasma_rgba;
+    const uint8_t(*const cmap)[4] = plasma_rgba;
 
     for (SizeType i = 0; i < rms_values.size1; i++) {
         const float power = clamp_unit(rms_values.slice1[i]);
@@ -53,6 +53,19 @@ void rms_history_render(const FloatHistory* rms_history)
         const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
         render_band(rms_values.size1 + i, power, color);
     }
+}
+
+// update the single pixel that just changed in the circular buffer
+void rms_history_update_texture(const FloatHistory* fh, Texture2D tex)
+{
+    const SizeType latest = fh->tail == 0 ? fh->cap - 1 : fh->tail - 1;
+    const float power = clamp_unit(fh->data[latest]);
+
+    const uint8_t(*const cmap)[4] = plasma_rgba;
+    const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
+    const Color* pixels = &color;  // 1 pixel
+
+    UpdateTextureRec(tex, (Rectangle){(float)latest, 0, 1, 1}, pixels);
 }
 
 #define ALERT_FRACTION 16
@@ -102,6 +115,16 @@ int main(int ac, const char** av)
 
     FloatHistory rms_history = fhistory_new(WINDOW_WIDTH / PIXEL_PER_BAND);
     float rms_buffer[RMS_SIZE] = {0};
+
+    // make a 1 x history_size texture that we will stretch later
+    // works because the rectangles have block color
+    //
+    // lets me decouple history size from window width, let raylib
+    // smooth/interpolate the pixels
+    Image img = GenImageColor(rms_history.cap, 1, BLACK);
+    Texture2D rms_tex = LoadTextureFromImage(img);
+    UnloadImage(img);
+    SetTextureFilter(rms_tex, TEXTURE_FILTER_BILINEAR);
 
     Music music = LoadMusicStream(music_path);
     if (!IsMusicValid(music)) {
