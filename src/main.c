@@ -115,7 +115,7 @@ int main(int ac, const char** av)
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
 
-    FloatHistory rms_history = fhistory_new(WINDOW_WIDTH / PIXEL_PER_BAND);
+    FloatHistory rms_history = fhistory_new(1024);
     float rms_buffer[RMS_SIZE] = {0};
 
     // make a 1 x history_size texture that we will stretch later
