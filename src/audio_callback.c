@@ -5,7 +5,6 @@
 #include <stdio.h>  // bad bad bad bad bad bad
 #include <stdlib.h>
 
-#include "LockFreeQueue.h"
 #include "definitions.h"
 
 #define MONO_BUFFER_SIZE 1024

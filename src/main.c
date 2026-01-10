@@ -6,9 +6,9 @@
 #include <raylib.h>
 #include <string.h>
 
-#include "LockFreeQueue.h"
 #include "audio_callback.h"
 #include "colormap/colormap.h"
+#include "core/LockFreeQueue.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900

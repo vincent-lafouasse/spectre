@@ -20,7 +20,7 @@ RAYLIB_VER  = 5.5
 RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
 RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
 
-INCS        = -I$(SRCS_DIR) -I$(RAYLIB_DIR) -I$(FFTW_INST)/include
+INCS        = -I$(SRCS_DIR) -I$(SRCS_DIR)/common -I$(RAYLIB_DIR) -I$(FFTW_INST)/include
 LIBS        = $(RAYLIB_LIB) $(FFTW_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 
 SRCS        = $(shell find src -name '*.c')
