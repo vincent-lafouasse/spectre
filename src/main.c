@@ -97,7 +97,7 @@ float rms(const float* restrict data, SizeType size)
 
 typedef struct {
     Texture2D texture;
-    SizeType last_processed_i;
+    SizeType last_syncd_tail;
     float height, width;
     Vector2 origin;
     SizeType size;
@@ -112,7 +112,7 @@ RMSVisualizer rms_vis_new(SizeType size, float w, float h, Vector2 origin)
 
     return (RMSVisualizer){
         .texture = texture,
-        .last_processed_i = 0,
+        .last_syncd_tail = 0,
         .height = h,
         .width = w,
         .origin = origin,
@@ -130,7 +130,12 @@ void rms_vis_destroy(RMSVisualizer* rv)
 }
 
 // called after processing and before drawing block
-void rms_vis_update(FloatHistory* rms_history);
+void rms_vis_update(RMSVisualizer* rv, const FloatHistory* rms_history)
+{
+    (void)rv;
+    (void)rms_history;
+}
+
 // draw call
 void rms_vis_render(/* ... */);
 
