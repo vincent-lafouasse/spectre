@@ -21,7 +21,6 @@ float clamp_unit(float f)
     return fminf(fmaxf(f, 0.0f), 1.0f);
 }
 
-// expected in [0.0, 1.0[ but will be clamped
 Color float_to_color(float intensity,
                      const uint8_t (*const cmap)[4],
                      SizeType cmap_size)
