@@ -34,8 +34,8 @@ void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
             frames <= MONO_BUFFER_SIZE ? frames : MONO_BUFFER_SIZE;
 
         for (SizeType i = 0; i < to_pull; i++) {
-            mono_buffer[i] =
-                0.5f * (samples[start + 2 * i] + samples[start + 2 * i + 1]);
+            const SizeType j = 2 * (start + i);
+            mono_buffer[i] = 0.5f * (samples[j] + samples[j + 1]);
         }
 
         const SizeType transmitted =
@@ -43,7 +43,7 @@ void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
         if (transmitted < to_pull) {
             break;
         }
-        start += 2 * transmitted;
+        start += transmitted;
         frames -= transmitted;
     }
 }
