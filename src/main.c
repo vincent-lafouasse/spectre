@@ -40,18 +40,16 @@ void render_band(SizeType band, float value, Color color)
 void rms_history_render(const FloatHistory* rms_history)
 {
     const SplitSlice rms_values = fhistory_get(rms_history);
-    const uint8_t(*const cmap)[4] = plasma_rgba;
-
-    const float analysis_gain = 0.3f;
+    const uint8_t (*const cmap)[4] = plasma_rgba;
 
     for (SizeType i = 0; i < rms_values.size1; i++) {
-        const float power = clamp_unit(rms_values.slice1[i] * analysis_gain * analysis_gain);
+        const float power = clamp_unit(rms_values.slice1[i]);
         const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
         render_band(i, power, color);
     }
 
     for (SizeType i = 0; i < rms_values.size2; i++) {
-        const float power = clamp_unit(rms_values.slice2[i] * analysis_gain * analysis_gain);
+        const float power = clamp_unit(rms_values.slice2[i]);
         const Color color = float_to_color(power, cmap, COLORMAP_SIZE);
         render_band(rms_values.size1 + i, power, color);
     }
@@ -74,7 +72,7 @@ float rms(const float* restrict data, SizeType size)
         sum += data[i] * data[i];
     }
 
-    return sqrtf(sum);
+    return sqrtf(sum / (float)size);
 }
 
 int main(int ac, const char** av)
