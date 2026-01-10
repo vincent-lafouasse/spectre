@@ -22,11 +22,11 @@ void deinit_audio_processor(void) {}
 // always interleaved stereo
 void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 {
-    LockFreeQueueProducer* sample_tx =
+    LockFreeQueueProducer* restrict sample_tx =
         atomic_load_explicit(&s_sample_tx, memory_order_acquire);
     assert(sample_tx != NULL);
 
-    const float* samples = (const float*)buffer;
+    const float* restrict samples = (const float*)buffer;
 
     SizeType start = 0;
     while (frames != 0) {
