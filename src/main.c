@@ -4,12 +4,10 @@
 #include <stdlib.h>
 
 #include <raylib.h>
+#include <string.h>
 
 #include "LockFreeQueue.h"
 #include "audio_callback.h"
-
-#define BUFFER_SIZE 256
-#define STRIDE_SIZE (BUFFER_SIZE / 2)
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -84,6 +82,9 @@ SplitSlice history_get(const History* h)
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
+#define RMS_SIZE 1024
+#define RMS_STRIDE (RMS_SIZE / 2)
+
 float rms(const float* data, SizeType size)
 {
     float sum = 0;
@@ -113,8 +114,8 @@ int main(void)
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
 
-    float buffer[BUFFER_SIZE];
-    SizeType buffer_idx = 0;
+    History rms_history = history_new();
+    float rms_buffer[RMS_SIZE] = {0};
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
@@ -128,6 +129,14 @@ int main(void)
             printf("oops, buffer underfull: %u\n", available);
         } else if (available > ALMOSTFULL_ALERT) {
             printf("oops, buffer almost full: %u\n", available);
+        }
+
+        while (clfq_pop(&sample_rx, rms_buffer + RMS_STRIDE, RMS_STRIDE)) {
+            const float rms_value = rms(rms_buffer, RMS_SIZE);
+            history_push(&rms_history, rms_value);
+
+            // move old data backward
+            memmove(rms_buffer, rms_buffer + RMS_STRIDE, RMS_STRIDE);
         }
 
         BeginDrawing();
