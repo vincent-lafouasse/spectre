@@ -118,7 +118,7 @@ void history_render(const History* h)
     }
 }
 
-#define ALERT_FRACTION 10
+#define ALERT_FRACTION 16
 // if ALERT_FRACTION is 10, alert at 10% and 90% fullness
 #define UNDERFULL_ALERT (CLF_QUEUE_SIZE / ALERT_FRACTION)
 #define ALMOSTFULL_ALERT \
