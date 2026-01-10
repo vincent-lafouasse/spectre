@@ -58,13 +58,13 @@ $(RAYLIB_LIB):
 
 .PHONY: clean
 clean:
-	$(RM) $(BUILD_DIR)
-	make clean -C $(RAYLIB_DIR)
+	$(RM) $(BUILD_DIR)/**/*.o
 	@echo "\033[31mRemoved object files\033[0m"
 
 .PHONY: fclean
 fclean: clean
-	$(RM) $(NAME)
+	$(RM) $(NAME) $(BUILD_DIR)
+	make clean -C $(RAYLIB_DIR)
 	$(RM) $(RAYLIB_LIB)
 	@echo "\033[31mRemoved $(NAME)\033[0m"
 
@@ -84,5 +84,5 @@ update: fclean
 	bear --output build/compile_commands.json -- $(MAKE) all
 	echo "\033[32mUpdate complete: build/compile_commands.json generated.\033[0m"
 
-re: fclean all
+re: clean all
 
