@@ -18,7 +18,7 @@
 
 float clamp_unit(float f)
 {
-    return (f < 0.0f) ? 0.0f : (f > 1.0f) ? 1.0f : f;
+    return fminf(fmaxf(f, 0.0f), 1.0f);
 }
 
 // expected in [0.0, 1.0[ but will be clamped
