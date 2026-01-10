@@ -8,6 +8,7 @@
 
 #include "LockFreeQueue.h"
 #include "audio_callback.h"
+#include "colormap/colormap.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -75,6 +76,47 @@ SplitSlice history_get(const History* h)
         .size2 = size2,
     };
 }
+Color color_from_floats(const float color[4])
+{
+    return (Color){.r = (unsigned char)(color[0] * 255.0f),
+                   .g = (unsigned char)(color[1] * 255.0f),
+                   .b = (unsigned char)(color[2] * 255.0f),
+                   .a = (unsigned char)(color[3] * 255.0f)};
+}
+
+void history_render(const History* h)
+{
+    const SplitSlice data = history_get(h);
+
+    for (SizeType i = 0; i < data.size1; i++) {
+        const float value = data.slice1[i];
+
+        const int height = (int)(value * WINDOW_HEIGHT);
+        int color_index = (int)(value * COLORMAP_SIZE);
+        color_index =
+            color_index >= COLORMAP_SIZE ? COLORMAP_SIZE - 1 : color_index;
+        color_index = color_index < 0 ? 0 : color_index;
+
+        const Color color = color_from_floats(viridis_rgba[color_index]);
+
+        DrawRectangle(PIXEL_PER_BAND * i, 0, PIXEL_PER_BAND, height, color);
+    }
+
+    for (SizeType i = 0; i < data.size2; i++) {
+        const float value = data.slice2[i];
+
+        const int height = (int)(value * WINDOW_HEIGHT);
+        int color_index = (int)(value * COLORMAP_SIZE);
+        color_index =
+            color_index >= COLORMAP_SIZE ? COLORMAP_SIZE - 1 : color_index;
+        color_index = color_index < 0 ? 0 : color_index;
+
+        const Color color = color_from_floats(viridis_rgba[color_index]);
+
+        DrawRectangle(PIXEL_PER_BAND * (data.size1 + i), 0, PIXEL_PER_BAND,
+                      height, color);
+    }
+}
 
 #define ALERT_FRACTION 10
 // if ALERT_FRACTION is 10, alert at 10% and 90% fullness
@@ -118,7 +160,7 @@ int main(void)
     History rms_history = history_new();
     float rms_buffer[RMS_SIZE] = {0};
 
-    Sound sound = LoadSound("audio/Bbmaj9.wav");
+    Sound sound = LoadSound("audio/an_idea.mp3");
     PlaySound(sound);
 
     SetTargetFPS(60);
@@ -143,6 +185,7 @@ int main(void)
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
+        history_render(&rms_history);
         EndDrawing();
 
         frame_counter++;
