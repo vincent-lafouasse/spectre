@@ -87,30 +87,29 @@ Color color_from_floats(const float color[4])
 void history_render(const History* h)
 {
     const SplitSlice data = history_get(h);
+    const float just_below_1 = nextafterf(1.0f, 0.0f);
 
     for (SizeType i = 0; i < data.size1; i++) {
-        const float value = data.slice1[i];
+        float raw_value = data.slice1[i];
+        raw_value = (raw_value < 0.0f) ? 0.0f : raw_value;
+        raw_value = (raw_value >= 1.0f) ? just_below_1 : raw_value;
+        const float value = raw_value;
 
         const int height = (int)(value * WINDOW_HEIGHT);
-        int color_index = (int)(value * COLORMAP_SIZE);
-        color_index =
-            color_index >= COLORMAP_SIZE ? COLORMAP_SIZE - 1 : color_index;
-        color_index = color_index < 0 ? 0 : color_index;
-
+        const int color_index = (int)(value * COLORMAP_SIZE);
         const Color color = color_from_floats(viridis_rgba[color_index]);
 
         DrawRectangle(PIXEL_PER_BAND * i, 0, PIXEL_PER_BAND, height, color);
     }
 
     for (SizeType i = 0; i < data.size2; i++) {
-        const float value = data.slice2[i];
+        float raw_value = data.slice2[i];
+        raw_value = (raw_value < 0.0f) ? 0.0f : raw_value;
+        raw_value = (raw_value >= 1.0f) ? just_below_1 : raw_value;
+        const float value = raw_value;
 
         const int height = (int)(value * WINDOW_HEIGHT);
-        int color_index = (int)(value * COLORMAP_SIZE);
-        color_index =
-            color_index >= COLORMAP_SIZE ? COLORMAP_SIZE - 1 : color_index;
-        color_index = color_index < 0 ? 0 : color_index;
-
+        const int color_index = (int)(value * COLORMAP_SIZE);
         const Color color = color_from_floats(viridis_rgba[color_index]);
 
         DrawRectangle(PIXEL_PER_BAND * (data.size1 + i), 0, PIXEL_PER_BAND,
