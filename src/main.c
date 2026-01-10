@@ -107,7 +107,7 @@ void render_band(SizeType band, float value, Color color)
 {
     const int height = (int)(value * WINDOW_HEIGHT);
     DrawRectangle(PIXEL_PER_BAND * band, WINDOW_HEIGHT - height, PIXEL_PER_BAND,
-                  WINDOW_HEIGHT, color);
+                  WINDOW_HEIGHT - 1, color);
 }
 
 void history_render(const History* h)
