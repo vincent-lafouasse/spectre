@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,10 +8,8 @@
 #include "LockFreeQueue.h"
 #include "audio_callback.h"
 
-/*
-#define STRIDE_RATIO 2
-#define STRIDE_SIZE (FFT_SIZE / STRIDE_RATIO)
-*/
+#define BUFFER_SIZE 256
+#define STRIDE_SIZE (BUFFER_SIZE / 2)
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -20,6 +19,17 @@
 #define UNDERFULL_ALERT (CLF_QUEUE_SIZE / ALERT_FRACTION)
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
+
+float rms(const float* data, SizeType size)
+{
+    float sum = 0;
+
+    for (SizeType i = 0; i < size; i++) {
+        sum += data[i] * data[i];
+    }
+
+    return sqrtf(sum);
+}
 
 int main(void)
 {
@@ -38,6 +48,9 @@ int main(void)
 
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
+
+    float buffer[BUFFER_SIZE];
+    SizeType buffer_idx = 0;
 
     Sound sound = LoadSound("audio/Bbmaj9.wav");
     PlaySound(sound);
