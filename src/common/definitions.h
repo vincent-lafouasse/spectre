@@ -12,3 +12,11 @@
 // 16k floats == 64KB, brutal but kinda needed for audio
 // this will be on the heap obviously
 #define CLF_QUEUE_SIZE (16 * FFT_SIZE)
+
+// one or two slices
+typedef struct {
+    const float* slice1;
+    SizeType size1;
+    const float* slice2;
+    SizeType size2;
+} SplitSlice;

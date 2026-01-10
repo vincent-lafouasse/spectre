@@ -8,74 +8,14 @@
 
 #include "audio_callback.h"
 #include "colormap/colormap.h"
+#include "core/History.h"
 #include "core/LockFreeQueue.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
 #define PIXEL_PER_BAND 4
-#define HISTORY_SIZE (WINDOW_WIDTH / PIXEL_PER_BAND)
 
-// keep a history of computed values for displaying
-// a circular buffer that overwrites its oldest data
-//
-// payload is `float rms` for now but will be `float fft[]` later
-typedef struct {
-    float data[HISTORY_SIZE];
-    SizeType head;  // always point to the oldest sample
-    SizeType tail;  // the next position to write to. can be equal to head
-    SizeType len;
-} History;
-
-History history_new(void)
-{
-    return (History){0};
-}
-
-void history_push(History* h, float f)
-{
-    h->data[h->tail] = f;
-    const SizeType new_tail = (h->tail + 1) % HISTORY_SIZE;
-    h->tail = new_tail;
-    if (h->len == HISTORY_SIZE) {
-        h->head = h->tail;
-    } else {
-        h->len += 1;
-    }
-}
-
-// one or two slices
-typedef struct {
-    const float* slice1;
-    SizeType size1;
-    const float* slice2;
-    SizeType size2;
-} SplitSlice;
-
-SplitSlice history_get(const History* h)
-{
-    // might be off the buffer
-    const SizeType end = h->head + h->len;
-
-    if (end <= HISTORY_SIZE) {
-        return (SplitSlice){
-            .slice1 = h->data + h->head,
-            .size1 = h->len,
-            .slice2 = NULL,
-            .size2 = 0,
-        };
-    }
-
-    const SizeType size1 = HISTORY_SIZE - h->head;
-    const SizeType size2 = h->len - size1;
-
-    return (SplitSlice){
-        .slice1 = h->data + h->head,
-        .size1 = size1,
-        .slice2 = h->data,
-        .size2 = size2,
-    };
-}
 Color color_from_floats(const float color[4])
 {
     return (Color){.r = (unsigned char)(color[0] * 255.0f),
@@ -110,21 +50,23 @@ void render_band(SizeType band, float value, Color color)
                   WINDOW_HEIGHT - 1, color);
 }
 
-void history_render(const History* h)
+void rms_history_render(const FloatHistory* rms_history)
 {
-    const SplitSlice data = history_get(h);
+    const SplitSlice rms_values = fhistory_get(rms_history);
     const float(*const cmap)[4] = plasma_rgba;
 
-    for (SizeType i = 0; i < data.size1; i++) {
-        const float value = clamp_float_exlusive(data.slice1[i], 0.0f, 1.0f);
+    for (SizeType i = 0; i < rms_values.size1; i++) {
+        const float value =
+            clamp_float_exlusive(rms_values.slice1[i], 0.0f, 1.0f);
         const Color color = float_to_color(value, cmap);
         render_band(i, value, color);
     }
 
-    for (SizeType i = 0; i < data.size2; i++) {
-        const float value = clamp_float_exlusive(data.slice2[i], 0.0f, 1.0f);
+    for (SizeType i = 0; i < rms_values.size2; i++) {
+        const float value =
+            clamp_float_exlusive(rms_values.slice2[i], 0.0f, 1.0f);
         const Color color = float_to_color(value, cmap);
-        render_band(data.size1 + i, value, color);
+        render_band(rms_values.size1 + i, value, color);
     }
 }
 
@@ -173,7 +115,7 @@ int main(int ac, const char** av)
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     (void)sample_rx;
 
-    History rms_history = history_new();
+    FloatHistory rms_history = fhistory_new(WINDOW_WIDTH / PIXEL_PER_BAND);
     float rms_buffer[RMS_SIZE] = {0};
 
     Music music = LoadMusicStream(music_path);
@@ -199,7 +141,7 @@ int main(int ac, const char** av)
 
         while (clfq_pop(&sample_rx, rms_buffer + RMS_STRIDE, RMS_STRIDE)) {
             const float rms_value = rms(rms_buffer, RMS_SIZE);
-            history_push(&rms_history, rms_value);
+            fhistory_push(&rms_history, rms_value);
 
             // move old data backward
             memmove(rms_buffer, rms_buffer + RMS_STRIDE, RMS_STRIDE);
@@ -207,13 +149,14 @@ int main(int ac, const char** av)
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        history_render(&rms_history);
+        rms_history_render(&rms_history);
         EndDrawing();
 
         frame_counter++;
     }
 
     free(sample_queue);
+    fhistory_destroy(rms_history);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
