@@ -163,10 +163,12 @@ int main(int ac, const char** av)
             memmove(rms_buffer, rms_buffer + RMS_STRIDE, RMS_STRIDE);
         }
 
-        BeginDrawing();
-        ClearBackground(BLACK);
-        rms_history_render_texture(rms_tex, &rms_history);
-        EndDrawing();
+        {
+            BeginDrawing();
+            ClearBackground(BLACK);
+            rms_history_render_texture(rms_tex, &rms_history);
+            EndDrawing();
+        }
 
         frame_counter++;
     }
