@@ -28,14 +28,22 @@ void pull_samples_from_audio_thread(void* buffer, unsigned int frames)
 
     const float* samples = (const float*)buffer;
 
+    SizeType start = 0;
     while (frames != 0) {
         const SizeType to_pull =
             frames <= MONO_BUFFER_SIZE ? frames : MONO_BUFFER_SIZE;
 
         for (SizeType i = 0; i < to_pull; i++) {
-            mono_buffer[i] = 0.5 * (samples[2 * i] + samples[2 * i + 1]);
+            mono_buffer[start + i] =
+                0.5 * (samples[start + 2 * i] + samples[start + 2 * i + 1]);
         }
 
-        (void)clfq_push_partial(sample_tx, mono_buffer, to_pull, 1);
+        const SizeType transmitted =
+            clfq_push_partial(sample_tx, mono_buffer, to_pull, 1);
+        if (transmitted < to_pull) {
+            break;
+        }
+        start += 2 * transmitted;
+        frames -= transmitted;
     }
 }
