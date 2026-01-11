@@ -10,6 +10,7 @@
 #include "RMSVisualizer.h"
 #include "audio_callback.h"
 #include "core/LockFreeQueue.h"
+#include "definitions.h"
 
 typedef _Complex float Complex;
 
@@ -28,6 +29,26 @@ typedef struct {
     SizeType cap;
     Complex* data;  // FFT_OUT_SIZE * cap flattened
 } FFTHistory;
+
+FFTHistory fft_history_new(SizeType cap)
+{
+    return (FFTHistory){
+        .head = 0,
+        .tail = 0,
+        .len = 0,
+        .cap = cap,
+        .data = malloc(sizeof(Complex) * cap * FFT_OUT_SIZE),
+    };
+}
+
+void fft_history_free(FFTHistory* fft_history)
+{
+    if (!fft_history) {
+        return;
+    }
+
+    free(fft_history->data);
+}
 
 typedef struct {
     fftwf_plan plan;
