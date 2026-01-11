@@ -105,7 +105,7 @@ typedef struct {
     FloatHistory history;
 } RMSAnalyzer;
 
-RMSAnalyzer rms_ana_new(LockFreeQueueConsumer sample_rx)
+RMSAnalyzer rms_analyzer_new(LockFreeQueueConsumer sample_rx)
 {
     return (RMSAnalyzer){
         .buffer = {0},
@@ -116,7 +116,7 @@ RMSAnalyzer rms_ana_new(LockFreeQueueConsumer sample_rx)
     };
 }
 
-void rms_ana_destroy(RMSAnalyzer* analyzer)
+void rms_analyzer_destroy(RMSAnalyzer* analyzer)
 {
     if (!analyzer) {
         return;
@@ -126,7 +126,7 @@ void rms_ana_destroy(RMSAnalyzer* analyzer)
 }
 
 // returns number of elements pushed onto its history
-SizeType rms_ana_update(RMSAnalyzer* analyzer)
+SizeType rms_analyzer_update(RMSAnalyzer* analyzer)
 {
     SizeType n = 0;
 
