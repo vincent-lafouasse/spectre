@@ -14,8 +14,6 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
-#define PIXEL_PER_BAND 4
-
 #define HISTORY_SIZE 1024
 
 #define ALERT_FRACTION 16
