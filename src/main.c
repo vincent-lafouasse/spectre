@@ -143,8 +143,8 @@ SizeType rms_analyzer_update(RMSAnalyzer* analyzer)
 }
 
 typedef struct {
+    // the texture is coupled to the history
     Texture2D texture;
-    SizeType last_syncd_tail;
     float height, width;
     Vector2 origin;
     SizeType size;
@@ -159,7 +159,6 @@ RMSVisualizer rms_vis_new(SizeType size, float w, float h, Vector2 origin)
 
     return (RMSVisualizer){
         .texture = texture,
-        .last_syncd_tail = 0,
         .height = h,
         .width = w,
         .origin = origin,
@@ -194,7 +193,6 @@ void rms_vis_update(RMSVisualizer* rv,
     n = n > rms_history->cap ? rms_history->cap : n;
     const SizeType start =
         (rms_history->cap + rms_history->tail - n) % rms_history->cap;
-    (void)rv;
 
     for (SizeType i = 0; i < n; i++) {
         const SizeType index = (start + i) % rms_history->cap;
@@ -204,7 +202,36 @@ void rms_vis_update(RMSVisualizer* rv,
 }
 
 // draw call
-void rms_vis_render(/* ... */);
+void rms_vis_render(const RMSVisualizer* rv, const FloatHistory* rms_history)
+{
+    const float band_width = rv->width / rms_history->cap;
+
+    for (SizeType i = 0; i < rms_history->cap; i++) {
+        if (rms_history->len < rms_history->cap && i >= rms_history->tail) {
+            break;
+        }
+
+        // stretch this
+        const Rectangle src = {(float)i, 0, 1, 1};
+
+        // to this
+        const float height = clamp_unit(rms_history->data[i]) * rv->height;
+        const Vector2 corner = {
+            i * band_width,
+            0.5f * (rv->height - height),
+        };
+        const Rectangle dest = {
+            corner.x,
+            corner.y,
+            band_width,
+            height,
+        };
+
+        const float angle = 0.0f;
+        const Color tint = WHITE;  // no tint
+        DrawTexturePro(rv->texture, src, dest, rv->origin, angle, tint);
+    }
+}
 
 int main(int ac, const char** av)
 {
