@@ -13,6 +13,8 @@
 // this will be on the heap obviously
 #define CLF_QUEUE_SIZE (16 * FFT_SIZE)
 
+#define HISTORY_SIZE 1024
+
 // one or two slices
 typedef struct {
     const float* slice1;
