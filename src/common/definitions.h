@@ -8,6 +8,7 @@
 // but the ring buffer should NOT include the FFT module
 
 #define FFT_SIZE 1024
+#define FFT_OUT_SIZE (1 + (FFT_SIZE / 2))
 
 // 16k floats == 64KB, brutal but kinda needed for audio
 // this will be on the heap obviously
