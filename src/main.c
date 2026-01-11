@@ -80,10 +80,10 @@ int main(int ac, const char** av)
         frame_counter++;
     }
 
-    free(sample_queue);
     rms_analyzer_destroy(&rms_analyzer);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
+    free(sample_queue);
     CloseWindow();
 }
