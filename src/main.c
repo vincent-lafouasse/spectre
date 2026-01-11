@@ -13,8 +13,7 @@
 #define WINDOW_HEIGHT 900
 
 #define ALERT_FRACTION 16
-// if ALERT_FRACTION is 10, alert at 10% and 90% fullness
-#define UNDERFULL_ALERT (CLF_QUEUE_SIZE / ALERT_FRACTION)
+// if ALERT_FRACTION is 10, alert at 90% fullness
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
@@ -62,9 +61,7 @@ int main(int ac, const char** av)
         UpdateMusicStream(music);
 
         const SizeType available = clfq_consumer_size_eager(&sample_rx);
-        if (available < UNDERFULL_ALERT) {
-            printf("frame %u buffer underfull: %u\n", frame_counter, available);
-        } else if (available > ALMOSTFULL_ALERT) {
+        if (available > ALMOSTFULL_ALERT) {
             printf("frame %u buffer almost full: %u\n", frame_counter,
                    available);
         }
