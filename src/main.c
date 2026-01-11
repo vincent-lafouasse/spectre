@@ -26,7 +26,7 @@ typedef struct {
     SizeType tail;  // the next position to write to. can be equal to head
     SizeType len;
     SizeType cap;
-    Complex* data;  // FFT_OUT_SIZE * HISTORY_SIZE flattened
+    Complex* data;  // FFT_OUT_SIZE * cap flattened
 } FFTHistory;
 
 typedef struct {
