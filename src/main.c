@@ -201,8 +201,7 @@ void rms_vis_update(RMSVisualizer* rv,
     }
 }
 
-// draw call
-void rms_vis_render(const RMSVisualizer* rv, const FloatHistory* rms_history)
+void rms_vis_render_static(const RMSVisualizer* rv, const FloatHistory* rms_history)
 {
     const float band_width = rv->width / rms_history->cap;
 
