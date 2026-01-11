@@ -11,6 +11,7 @@
 #include "audio_callback.h"
 #include "core/LockFreeQueue.h"
 #include "definitions.h"
+#include "dsp/filters.h"
 
 typedef _Complex float Complex;
 
@@ -64,21 +65,27 @@ typedef struct {
     float* input;
     Complex* output;
     FFTHistory history;
+    OnePoleFilter dc_blocker;
+    float sample_rate;
 } FFTAnalyzer;
 
-FFTAnalyzer fft_ana_new(void)
+FFTAnalyzer fft_ana_new(float sample_rate)
 {
     float* input = fftwf_alloc_real(FFT_SIZE);
     Complex* output = fftwf_alloc_complex(FFT_OUT_SIZE);
     fftwf_plan plan =
         fftwf_plan_dft_r2c_1d(FFT_SIZE, input, output, FFTW_MEASURE);
     FFTHistory history = fft_history_new(HISTORY_SIZE);
+    const float dc_frequency_cutoff = 10.0f;  // 10 Hz
+    OnePoleFilter dc_blocker = filter_init(dc_frequency_cutoff, sample_rate);
 
     return (FFTAnalyzer){
         .plan = plan,
         .input = input,
         .output = output,
         .history = history,
+        .dc_blocker = dc_blocker,
+        .sample_rate = sample_rate,
     };
 }
 
