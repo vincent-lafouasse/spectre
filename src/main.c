@@ -41,6 +41,15 @@ FFTHistory fft_history_new(SizeType cap)
     };
 }
 
+bool fft_history_ok(const FFTHistory* fft_history)
+{
+    if (!fft_history) {
+        return false;
+    }
+
+    return fft_history->data != NULL;
+}
+
 void fft_history_free(FFTHistory* fft_history)
 {
     if (!fft_history) {
