@@ -141,7 +141,7 @@ int main(int ac, const char** av)
         {
             BeginDrawing();
             ClearBackground(BLACK);
-            rms_vis_render_static(&visualizer, &rms_analyzer.history);
+            rms_vis_render_wrap(&visualizer, &rms_analyzer.history);
             EndDrawing();
         }
 

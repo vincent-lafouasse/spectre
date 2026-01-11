@@ -19,5 +19,5 @@ void rms_vis_destroy(RMSVisualizer* rv);
 void rms_vis_update(RMSVisualizer* rv,
                     const FloatHistory* rms_history,
                     SizeType n);
-void rms_vis_render_static(const RMSVisualizer* rv,
-                           const FloatHistory* rms_history);
+void rms_vis_render_wrap(const RMSVisualizer* rv,
+                         const FloatHistory* rms_history);
