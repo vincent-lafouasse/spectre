@@ -67,14 +67,17 @@ void rms_analyzer_destroy(RMSAnalyzer* analyzer)
 // returns number of elements pushed onto its history
 SizeType rms_analyzer_update(RMSAnalyzer* analyzer)
 {
-    SizeType n = 0;
+    // stride is the number of sample we discard and also the number of new
+    // samples we need to read
+    const SizeType to_keep = analyzer->size - analyzer->stride;
+    const SizeType to_read = analyzer->stride;
 
-    while (clfq_pop(&analyzer->rx, analyzer->buffer + analyzer->stride,
-                    analyzer->stride)) {
+    SizeType n = 0;
+    while (clfq_pop(&analyzer->rx, analyzer->buffer + to_keep, to_read)) {
         const float rms_value = rms(analyzer->buffer, analyzer->size);
         fhistory_push(&analyzer->history, rms_value);
-        memmove(analyzer->buffer, analyzer->buffer + analyzer->stride,
-                analyzer->stride);
+        // ditch the first to_read samples
+        memmove(analyzer->buffer, analyzer->buffer + to_read, to_keep);
         ++n;
     }
 
@@ -103,12 +106,9 @@ int main(int ac, const char** av)
     init_audio_processor(&sample_tx);
     AttachAudioMixedProcessor(pull_samples_from_audio_thread);
 
-    LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
-    (void)sample_rx;
-
     // analyzer
-    FloatHistory rms_history = fhistory_new(HISTORY_SIZE);
-    float rms_buffer[RMS_SIZE] = {0};
+    LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
+    RMSAnalyzer rms_analyzer = rms_analyzer_new(sample_rx);
 
     // visualizer
     RMSVisualizer visualizer = rms_vis_new(
@@ -135,21 +135,13 @@ int main(int ac, const char** av)
                    available);
         }
 
-        SizeType processed = 0;
-        while (clfq_pop(&sample_rx, rms_buffer + RMS_STRIDE, RMS_STRIDE)) {
-            const float rms_value = rms(rms_buffer, RMS_SIZE);
-            fhistory_push(&rms_history, rms_value);
+        SizeType processed = rms_analyzer_update(&rms_analyzer);
+        rms_vis_update(&visualizer, &rms_analyzer.history, processed);
 
-            // move old data backward
-            memmove(rms_buffer, rms_buffer + RMS_STRIDE, RMS_STRIDE);
-            processed++;
-        }
-
-        rms_vis_update(&visualizer, &rms_history, processed);
         {
             BeginDrawing();
             ClearBackground(BLACK);
-            rms_vis_render_static(&visualizer, &rms_history);
+            rms_vis_render_static(&visualizer, &rms_analyzer.history);
             EndDrawing();
         }
 
@@ -157,7 +149,7 @@ int main(int ac, const char** av)
     }
 
     free(sample_queue);
-    fhistory_destroy(rms_history);
+    rms_analyzer_destroy(&rms_analyzer);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
