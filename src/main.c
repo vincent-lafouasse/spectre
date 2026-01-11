@@ -29,17 +29,19 @@ typedef struct {
     SizeType tail;  // the next position to write to. can be equal to head
     SizeType len;
     SizeType cap;
-    Complex* data;  // FFT_OUT_SIZE * cap flattened
+    SizeType n_bins;
+    Complex* data;  // n_bins * cap flattened
 } FFTHistory;
 
-FFTHistory fft_history_new(SizeType cap)
+FFTHistory fft_history_new(SizeType cap, SizeType n_bins)
 {
     return (FFTHistory){
         .head = 0,
         .tail = 0,
         .len = 0,
         .cap = cap,
-        .data = malloc(sizeof(Complex) * cap * FFT_OUT_SIZE),
+        .n_bins = n_bins,
+        .data = malloc(sizeof(Complex) * cap * n_bins),
     };
 }
 
@@ -63,8 +65,8 @@ void fft_history_free(FFTHistory* fft_history)
 
 void fft_history_push(FFTHistory* fh, const Complex* row)
 {
-    Complex* dest = fh->data + (fh->tail * FFT_OUT_SIZE);
-    memcpy(dest, row, sizeof(Complex) * FFT_OUT_SIZE);
+    Complex* dest = fh->data + (fh->tail * fh->n_bins);
+    memcpy(dest, row, sizeof(Complex) * fh->n_bins);
     fh->tail = (fh->tail + 1) % fh->cap;
 
     if (fh->len < fh->cap) {
@@ -76,7 +78,7 @@ void fft_history_push(FFTHistory* fh, const Complex* row)
 
 const Complex* fft_history_get_row(const FFTHistory* fh, SizeType i)
 {
-    return fh->data + (i * FFT_OUT_SIZE);
+    return fh->data + (i * fh->n_bins);
 }
 
 typedef struct {
@@ -91,10 +93,13 @@ typedef struct {
 FFTAnalyzer fft_ana_new(float sample_rate)
 {
     float* input = fftwf_alloc_real(FFT_SIZE);
-    Complex* output = fftwf_alloc_complex(FFT_OUT_SIZE);
+    Complex* output = fftwf_alloc_complex(1 + (FFT_SIZE / 2));
     fftwf_plan plan =
         fftwf_plan_dft_r2c_1d(FFT_SIZE, input, output, FFTW_MEASURE);
-    FFTHistory history = fft_history_new(HISTORY_SIZE);
+
+    const SizeType n_bins = FFT_SIZE / 2;  // ditch the DC information
+    FFTHistory history = fft_history_new(HISTORY_SIZE, n_bins);
+
     const float dc_frequency_cutoff = 10.0f;  // 10 Hz
     OnePoleFilter dc_blocker = filter_init(dc_frequency_cutoff, sample_rate);
 
