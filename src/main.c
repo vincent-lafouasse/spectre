@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <fftw3.h>
 #include <raylib.h>
 
 #include "RMSAnalyzer.h"
@@ -16,6 +17,21 @@
 // if ALERT_FRACTION is 10, alert at 90% fullness
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
+
+typedef struct {
+    SizeType head;  // always point to the oldest sample
+    SizeType tail;  // the next position to write to. can be equal to head
+    SizeType len;
+    SizeType cap;
+    fftwf_complex* data;  // a (FFT_SIZE/2) * HISTORY_SIZE array
+} FFTHistory;
+
+typedef struct {
+    fftwf_plan plan;
+    float* input;
+    fftwf_complex* output;
+    SizeType size;
+} FFTAnalyzer;
 
 int main(int ac, const char** av)
 {
