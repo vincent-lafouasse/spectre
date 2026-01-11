@@ -143,7 +143,8 @@ SizeType rms_analyzer_update(RMSAnalyzer* analyzer)
 }
 
 typedef struct {
-    // the texture is coupled to the history
+    // the texture is contains the same info as the history
+    // except it's on the GPU
     Texture2D texture;
     float height, width;
     Vector2 origin;
