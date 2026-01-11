@@ -192,7 +192,8 @@ void rms_vis_update(RMSVisualizer* rv,
                     SizeType n)
 {
     n = n > rms_history->cap ? rms_history->cap : n;
-    const SizeType start = (rms_history->cap + rms_history->tail - n) % rms_history->cap;
+    const SizeType start =
+        (rms_history->cap + rms_history->tail - n) % rms_history->cap;
     (void)rv;
 
     for (SizeType i = 0; i < n; i++) {
