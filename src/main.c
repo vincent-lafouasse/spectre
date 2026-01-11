@@ -66,6 +66,34 @@ typedef struct {
     FFTHistory history;
 } FFTAnalyzer;
 
+FFTAnalyzer fft_ana_new(void)
+{
+    float* input = fftwf_alloc_real(FFT_SIZE);
+    Complex* output = fftwf_alloc_complex(FFT_OUT_SIZE);
+    fftwf_plan plan =
+        fftwf_plan_dft_r2c_1d(FFT_SIZE, input, output, FFTW_MEASURE);
+    FFTHistory history = fft_history_new(HISTORY_SIZE);
+
+    return (FFTAnalyzer){
+        .plan = plan,
+        .input = input,
+        .output = output,
+        .history = history,
+    };
+}
+
+void fft_ana_free(FFTAnalyzer* analyzer)
+{
+    if (!analyzer) {
+        return;
+    }
+
+    fftwf_destroy_plan(analyzer->plan);
+    fftwf_free(analyzer->input);
+    fftwf_free(analyzer->output);
+    fft_history_free(&analyzer->history);
+}
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
