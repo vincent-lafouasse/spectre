@@ -33,6 +33,7 @@ typedef struct {
     fftwf_plan plan;
     float* input;
     Complex* output;
+    FFTHistory history;
 } FFTAnalyzer;
 
 int main(int ac, const char** av)
