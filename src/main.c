@@ -176,11 +176,30 @@ void rms_vis_destroy(RMSVisualizer* rv)
     UnloadTexture(rv->texture);
 }
 
-// called after processing and before drawing block
-void rms_vis_update(RMSVisualizer* rv, const FloatHistory* rms_history)
+void rms_vis_update_value(RMSVisualizer* rv, float value, SizeType index)
 {
+    const uint8_t(*const cmap)[4] = plasma_rgba;
+    value = clamp_unit(value);
+    const Color color = float_to_color(value, cmap, COLORMAP_SIZE);
+    const Color* pixels = &color;  // 1 pixel
+
+    UpdateTextureRec(rv->texture, (Rectangle){(float)index, 0, 1, 1}, pixels);
+}
+
+// called after processing and before drawing block
+void rms_vis_update(RMSVisualizer* rv,
+                    const FloatHistory* rms_history,
+                    SizeType n)
+{
+    n = n > rms_history->cap ? rms_history->cap : n;
+    const SizeType start = (rms_history->cap + rms_history->tail - n) % rms_history->cap;
     (void)rv;
-    (void)rms_history;
+
+    for (SizeType i = 0; i < n; i++) {
+        const SizeType index = (start + i) % rms_history->cap;
+        const float value = rms_history->data[index];
+        rms_vis_update_value(rv, value, index);
+    }
 }
 
 // draw call
