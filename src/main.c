@@ -2,6 +2,7 @@
 #include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <fftw3.h>
 #include <raylib.h>
@@ -58,6 +59,24 @@ void fft_history_free(FFTHistory* fft_history)
     }
 
     free(fft_history->data);
+}
+
+void fft_history_push(FFTHistory* fh, const Complex* row)
+{
+    Complex* dest = fh->data + (fh->tail * FFT_OUT_SIZE);
+    memcpy(dest, row, sizeof(Complex) * FFT_OUT_SIZE);
+    fh->tail = (fh->tail + 1) % fh->cap;
+
+    if (fh->len < fh->cap) {
+        fh->len++;
+    } else {
+        fh->head = fh->tail;
+    }
+}
+
+const Complex* fft_history_get_row(const FFTHistory* fh, SizeType i)
+{
+    return fh->data + (i * FFT_OUT_SIZE);
 }
 
 typedef struct {
