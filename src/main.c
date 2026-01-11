@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +10,8 @@
 #include "RMSVisualizer.h"
 #include "audio_callback.h"
 #include "core/LockFreeQueue.h"
+
+typedef _Complex float Complex;
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -29,7 +32,7 @@ typedef struct {
 typedef struct {
     fftwf_plan plan;
     float* input;
-    fftwf_complex* output;
+    Complex* output;
     SizeType size;
 } FFTAnalyzer;
 
