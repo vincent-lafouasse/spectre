@@ -2,7 +2,6 @@
 #include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include <fftw3.h>
 #include <raylib.h>
@@ -14,8 +13,6 @@
 #include "definitions.h"
 #include "dsp/filters.h"
 
-typedef _Complex float Complex;
-
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
@@ -23,63 +20,6 @@ typedef _Complex float Complex;
 // if ALERT_FRACTION is 10, alert at 90% fullness
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
-
-typedef struct {
-    SizeType head;  // always point to the oldest sample
-    SizeType tail;  // the next position to write to. can be equal to head
-    SizeType len;
-    SizeType cap;
-    SizeType n_bins;
-    Complex* data;  // n_bins * cap flattened
-} FFTHistory;
-
-FFTHistory fft_history_new(SizeType cap, SizeType n_bins)
-{
-    return (FFTHistory){
-        .head = 0,
-        .tail = 0,
-        .len = 0,
-        .cap = cap,
-        .n_bins = n_bins,
-        .data = malloc(sizeof(Complex) * cap * n_bins),
-    };
-}
-
-bool fft_history_ok(const FFTHistory* fft_history)
-{
-    if (!fft_history) {
-        return false;
-    }
-
-    return fft_history->data != NULL;
-}
-
-void fft_history_free(FFTHistory* fft_history)
-{
-    if (!fft_history) {
-        return;
-    }
-
-    free(fft_history->data);
-}
-
-void fft_history_push(FFTHistory* fh, const Complex* row)
-{
-    Complex* dest = fh->data + (fh->tail * fh->n_bins);
-    memcpy(dest, row, sizeof(Complex) * fh->n_bins);
-    fh->tail = (fh->tail + 1) % fh->cap;
-
-    if (fh->len < fh->cap) {
-        fh->len++;
-    } else {
-        fh->head = fh->tail;
-    }
-}
-
-const Complex* fft_history_get_row(const FFTHistory* fh, SizeType i)
-{
-    return fh->data + (i * fh->n_bins);
-}
 
 typedef struct {
     fftwf_plan plan;

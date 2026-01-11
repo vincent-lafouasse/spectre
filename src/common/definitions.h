@@ -1,5 +1,7 @@
 #pragma once
 
+#include <complex.h>
+
 // check that a suitable size type is always lock free and defines it
 #include "platform_check.h"
 
@@ -22,3 +24,5 @@ typedef struct {
     const float* slice2;
     SizeType size2;
 } SplitSlice;
+
+typedef _Complex float Complex;
