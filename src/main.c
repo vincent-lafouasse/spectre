@@ -44,8 +44,9 @@ int main(int ac, const char** av)
     RMSAnalyzer rms_analyzer = rms_analyzer_new(sample_rx);
 
     // visualizer
-    RMSVisualizer visualizer = rms_vis_new(
-        HISTORY_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT, (Vector2){0.0f, 0.0f});
+    RMSVisualizer visualizer =
+        rms_vis_new(rms_analyzer.history.cap, WINDOW_WIDTH, WINDOW_HEIGHT,
+                    (Vector2){0.0f, 0.0f});
 
     Music music = LoadMusicStream(music_path);
     if (!IsMusicValid(music)) {
