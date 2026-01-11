@@ -25,12 +25,15 @@ typedef struct {
     fftwf_plan plan;
     float* input;
     Complex* output;
+
     FFTHistory history;
+    LockFreeQueueConsumer rx;
+
     OnePoleFilter dc_blocker;
     float sample_rate;
 } FFTAnalyzer;
 
-FFTAnalyzer fft_ana_new(float sample_rate)
+FFTAnalyzer fft_ana_new(float sample_rate, LockFreeQueueConsumer rx)
 {
     float* input = fftwf_alloc_real(FFT_SIZE);
     Complex* output = fftwf_alloc_complex(1 + (FFT_SIZE / 2));
@@ -48,6 +51,7 @@ FFTAnalyzer fft_ana_new(float sample_rate)
         .input = input,
         .output = output,
         .history = history,
+        .rx = rx,
         .dc_blocker = dc_blocker,
         .sample_rate = sample_rate,
     };
