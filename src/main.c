@@ -126,7 +126,21 @@ void rms_ana_destroy(RMSAnalyzer* analyzer)
 }
 
 // returns number of elements pushed onto its history
-SizeType rms_ana_update(RMSAnalyzer* analyzer);
+SizeType rms_ana_update(RMSAnalyzer* analyzer)
+{
+    SizeType n = 0;
+
+    while (clfq_pop(&analyzer->rx, analyzer->buffer + analyzer->stride,
+                    analyzer->stride)) {
+        const float rms_value = rms(analyzer->buffer, analyzer->size);
+        fhistory_push(&analyzer->history, rms_value);
+        memmove(analyzer->buffer, analyzer->buffer + analyzer->stride,
+                analyzer->stride);
+        ++n;
+    }
+
+    return n;
+}
 
 typedef struct {
     Texture2D texture;
