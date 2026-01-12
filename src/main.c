@@ -33,7 +33,7 @@ typedef struct {
     float sample_rate;
 } FFTAnalyzer;
 
-FFTAnalyzer fft_ana_new(float sample_rate, LockFreeQueueConsumer rx)
+FFTAnalyzer fft_analyzer_new(float sample_rate, LockFreeQueueConsumer rx)
 {
     float* input = fftwf_alloc_real(FFT_SIZE);
     Complex* output = fftwf_alloc_complex(1 + (FFT_SIZE / 2));
@@ -57,7 +57,7 @@ FFTAnalyzer fft_ana_new(float sample_rate, LockFreeQueueConsumer rx)
     };
 }
 
-void fft_ana_free(FFTAnalyzer* analyzer)
+void fft_analyzer_free(FFTAnalyzer* analyzer)
 {
     if (!analyzer) {
         return;
@@ -68,6 +68,9 @@ void fft_ana_free(FFTAnalyzer* analyzer)
     fftwf_free(analyzer->output);
     fft_history_free(&analyzer->history);
 }
+
+// returns number of elements pushed onto its history
+SizeType fft_analyzer_update(FFTAnalyzer* analyzer);
 
 int main(int ac, const char** av)
 {
