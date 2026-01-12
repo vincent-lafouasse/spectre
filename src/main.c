@@ -8,8 +8,6 @@
 #include <fftw3.h>
 #include <raylib.h>
 
-#include "RMSAnalyzer.h"
-#include "RMSVisualizer.h"
 #include "audio_callback.h"
 #include "colormap/palette.h"
 #include "core/History.h"
@@ -256,22 +254,22 @@ int main(int ac, const char** av)
     init_audio_processor(&sample_tx);
     AttachAudioMixedProcessor(pull_samples_from_audio_thread);
 
-    // analyzer
-    LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
-    RMSAnalyzer rms_analyzer = rms_analyzer_new(sample_rx);
-
-    // visualizer
-    RMSVisualizer visualizer =
-        rms_vis_new(rms_analyzer.history.cap, WINDOW_WIDTH, WINDOW_HEIGHT,
-                    (Vector2){0.0f, 0.0f});
-
     Music music = LoadMusicStream(music_path);
     if (!IsMusicValid(music)) {
         printf("Failed to open %s\n", music_path);
         exit(1);
     }
-    PlayMusicStream(music);
 
+    // analyzer
+    LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
+    FFTAnalyzer analyzer = fft_analyzer_new(music.stream.sampleRate, sample_rx,
+                                            FFT_SIZE, FFT_SIZE / 2);
+
+    // visualizer
+    FFTVisualizer visualizer = fft_vis_new(
+        &analyzer, WINDOW_WIDTH, WINDOW_HEIGHT, (Vector2){0.0f, 0.0f});
+
+    PlayMusicStream(music);
     SetTargetFPS(60);
 
     SizeType frame_counter = 0;
@@ -284,20 +282,22 @@ int main(int ac, const char** av)
                    available);
         }
 
-        const SizeType processed = rms_analyzer_update(&rms_analyzer);
-        rms_vis_update(&visualizer, &rms_analyzer.history, processed);
+        // pull samples from queue and push onto its history
+        const SizeType processed = fft_analyzer_update(&analyzer);
+        fft_vis_update(&visualizer, &analyzer.history, processed);
 
         {
             BeginDrawing();
             ClearBackground(BACKGROUND_COLOR);
-            rms_vis_render_wrap(&visualizer, &rms_analyzer.history);
+            fft_vis_render_wrap(&visualizer, &analyzer.history);
             EndDrawing();
         }
 
         frame_counter++;
     }
 
-    rms_analyzer_destroy(&rms_analyzer);
+    fft_analyzer_free(&analyzer);
+    fft_vis_destroy(&visualizer);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
