@@ -12,6 +12,7 @@
 #include "RMSVisualizer.h"
 #include "audio_callback.h"
 #include "colormap/palette.h"
+#include "core/History.h"
 #include "core/LockFreeQueue.h"
 #include "definitions.h"
 #include "dsp/filters.h"
@@ -194,7 +195,18 @@ static void fft_vis_update_column(FFTVisualizer* fv,
                      fv->column_buffer);
 }
 
-void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n);
+void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n)
+{
+    n = (n >= h->cap) ? h->cap : n;
+    const SizeType start = (h->tail - n + h->cap) % h->cap;
+
+    for (SizeType i = 0; i < n; i++) {
+        const SizeType index = (start + i) % h->cap;
+        const Complex* bins = fft_history_get_row(h, index);
+        fft_vis_update_column(fv, bins, index);
+    }
+}
+
 void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h);
 
 int main(int ac, const char** av)
