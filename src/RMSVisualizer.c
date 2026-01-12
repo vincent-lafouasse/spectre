@@ -9,9 +9,7 @@ static float clamp_unit(float f)
     return fminf(fmaxf(f, 0.0f), 1.0f);
 }
 
-static Color float_to_color(float intensity,
-                            const uint8_t (*const cmap)[4],
-                            SizeType cmap_size)
+static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
 {
     const float clamped = clamp_unit(intensity);
     const int index = (int)(clamped * (cmap_size - 0.0001f));
@@ -45,7 +43,7 @@ void rms_vis_destroy(RMSVisualizer* rv)
 
 static void rms_vis_update_value(RMSVisualizer* rv, float value, SizeType index)
 {
-    const uint8_t (*const cmap)[4] = plasma_rgba;
+    Colormap cmap = plasma_rgba;
     value = clamp_unit(value);
     const Color color = float_to_color(value, cmap, COLORMAP_SIZE);
     const Color* pixels = &color;  // 1 pixel

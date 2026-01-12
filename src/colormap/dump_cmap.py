@@ -36,7 +36,11 @@ def make_header():
     with open(f"{BASENAME}.h", "w") as f:
         f.write("#pragma once\n")
         f.write("\n")
+        f.write(f"#include <stdint.h>\n")
+        f.write("\n")
         f.write(f"#define COLORMAP_SIZE {COLORMAP_SIZE}\n")
+        f.write("\n")
+        f.write("typedef const uint8_t (*const Colormap)[4];\n")
         f.write("\n")
         for cmap in COLORMAPS:
             decl = array_declaration(cmap)
