@@ -215,7 +215,8 @@ void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n)
 void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h)
 {
     const SizeType filled_columns = (h->len < h->cap) ? h->tail : h->cap;
-    const Rectangle src = {0, 0, (float)filled_columns, (float)fv->n_bins};
+    //                            REVERSED HORIZONTALLY v
+    const Rectangle src = {0, 0, (float)filled_columns, -(float)fv->n_bins};
 
     const float screen_draw_width =
         (filled_columns / (float)h->cap) * fv->width;
