@@ -24,6 +24,10 @@
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
 typedef struct {
+    SizeType fft_size;
+} FFTConfig;
+
+typedef struct {
     SizeType size;
     SizeType stride;
 
