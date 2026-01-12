@@ -113,6 +113,7 @@ typedef struct {
     float height, width;
     Vector2 origin;
     SizeType size, n_bins;
+    Color* column_buffer;
 } FFTVisualizer;
 
 static float clamp_unit(float f)
@@ -142,6 +143,8 @@ FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
     UnloadImage(img);
     SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
 
+    Color* column_buffer = malloc(sizeof(Color) * n_bins);
+
     return (FFTVisualizer){
         .texture = texture,
         .height = h,
@@ -149,6 +152,7 @@ FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
         .origin = origin,
         .size = size,
         .n_bins = n_bins,
+        .column_buffer = column_buffer,
     };
 }
 
@@ -159,6 +163,7 @@ void fft_vis_destroy(FFTVisualizer* fv)
     }
 
     UnloadTexture(fv->texture);
+    free(fv->column_buffer);
 }
 
 void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n);
