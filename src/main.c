@@ -181,6 +181,8 @@ static void fft_vis_update_column(FFTVisualizer* fv,
 
         const float power = re * re + im * im;
         const float db = 10.0f * log10f((power / reference_power) + 1e-9f);
+
+        // scale [min_db, reference_power] to [0, 1]
         const float intensity = (db - min_db) / (-min_db);
 
         fv->column_buffer[b] = float_to_color(intensity, cmap, COLORMAP_SIZE);
