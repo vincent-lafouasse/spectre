@@ -8,6 +8,7 @@ COLORMAPS = [
     "plasma",
     "inferno",
     "magma",
+    "cividis",
 ]
 
 COLORMAP_SIZE = 256

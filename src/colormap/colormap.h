@@ -10,3 +10,4 @@ extern const uint8_t viridis_rgba[256][4];
 extern const uint8_t plasma_rgba[256][4];
 extern const uint8_t inferno_rgba[256][4];
 extern const uint8_t magma_rgba[256][4];
+extern const uint8_t cividis_rgba[256][4];
