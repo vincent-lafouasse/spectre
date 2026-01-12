@@ -1,5 +1,5 @@
 // Matplotlib plasma
-static const unsigned char plasma_rgba[256][4] = {
+const unsigned char plasma_rgba[256][4] = {
     { 13,   8, 135, 255},
     { 16,   7, 136, 255},
     { 19,   7, 137, 255},

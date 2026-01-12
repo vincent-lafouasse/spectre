@@ -1,5 +1,5 @@
 // Matplotlib inferno
-static const unsigned char inferno_rgba[256][4] = {
+const unsigned char inferno_rgba[256][4] = {
     {  0,   0,   4, 255},
     {  1,   0,   5, 255},
     {  1,   1,   6, 255},
