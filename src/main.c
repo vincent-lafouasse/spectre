@@ -183,6 +183,7 @@ static void fft_vis_update_column(FFTVisualizer* fv,
         const float db = 10.0f * log10f((power / reference_power) + 1e-9f);
 
         // scale [min_db, reference_power] to [0, 1]
+        // reference_power would appear here but it's 0dB by definition
         const float intensity = (db - min_db) / (-min_db);
 
         fv->column_buffer[b] = float_to_color(intensity, cmap, COLORMAP_SIZE);
@@ -246,7 +247,7 @@ int main(int ac, const char** av)
                    available);
         }
 
-        SizeType processed = rms_analyzer_update(&rms_analyzer);
+        const SizeType processed = rms_analyzer_update(&rms_analyzer);
         rms_vis_update(&visualizer, &rms_analyzer.history, processed);
 
         {
