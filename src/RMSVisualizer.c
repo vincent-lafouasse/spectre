@@ -43,7 +43,7 @@ void rms_vis_destroy(RMSVisualizer* rv)
 
 static void rms_vis_update_value(RMSVisualizer* rv, float value, SizeType index)
 {
-    Colormap cmap = inferno_rgba;
+    Colormap cmap = plasma_rgba;
     value = clamp_unit(value);
     const Color color = float_to_color(value, cmap, COLORMAP_SIZE);
     const Color* pixels = &color;  // 1 pixel
