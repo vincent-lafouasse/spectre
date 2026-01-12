@@ -107,6 +107,21 @@ SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
     return n;
 }
 
+typedef struct {
+    Texture2D texture;
+    float height, width;
+    Vector2 origin;
+    SizeType size, n_bins;
+} FFTVisualizer;
+
+FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
+                          float w,
+                          float h,
+                          Vector2 origin);
+void fft_vis_destroy(FFTVisualizer* fv);
+void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n);
+void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h);
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
