@@ -24,51 +24,49 @@
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
 typedef struct {
-    const SizeType fft_size;
+    const SizeType size;
+    const SizeType stride;
+    const float sample_rate;
+    const float dc_blocker_frequency;
+    const SizeType history_size;
 } FFTConfig;
 
 typedef struct {
-    SizeType size;
-    SizeType stride;
+    FFTConfig cfg;
 
     fftwf_plan plan;
     float* input;
     Complex* output;
+    const SizeType n_bins;
 
-    FFTHistory history;
     LockFreeQueueConsumer rx;
-
+    FFTHistory history;
     OnePoleFilter dc_blocker;
-    float sample_rate;
 } FFTAnalyzer;
 
-FFTAnalyzer fft_analyzer_new(float sample_rate,
-                             LockFreeQueueConsumer rx,
-                             SizeType size,
-                             SizeType stride)
+FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
 {
-    float* input = fftwf_alloc_real(size);
-    memset(input, 0, sizeof(*input) * size);
-    Complex* output = fftwf_alloc_complex(1 + (size / 2));
-    fftwf_plan plan = fftwf_plan_dft_r2c_1d(size, input, output,
+    float* input = fftwf_alloc_real(cfg->size);
+    memset(input, 0, sizeof(*input) * cfg->size);
+    Complex* output = fftwf_alloc_complex(1 + (cfg->size / 2));
+    fftwf_plan plan = fftwf_plan_dft_r2c_1d(cfg->size, input, output,
                                             FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 
-    const SizeType n_bins = size / 2;  // ditch the DC information
-    FFTHistory history = fft_history_new(HISTORY_SIZE, n_bins);
+    const SizeType n_bins = cfg->size / 2;  // ditch the DC information
+    FFTHistory history = fft_history_new(cfg->history_size, n_bins);
 
-    const float dc_frequency_cutoff = 10.0f;  // 10 Hz
-    OnePoleFilter dc_blocker = filter_init(dc_frequency_cutoff, sample_rate);
+    OnePoleFilter dc_blocker =
+        filter_init(cfg->dc_blocker_frequency, cfg->sample_rate);
 
     return (FFTAnalyzer){
-        .size = size,
-        .stride = stride,
+        .cfg = *cfg,
         .plan = plan,
         .input = input,
         .output = output,
+        .n_bins = n_bins,
         .history = history,
-        .rx = rx,
         .dc_blocker = dc_blocker,
-        .sample_rate = sample_rate,
+        .rx = rx,
     };
 }
 
@@ -87,8 +85,8 @@ void fft_analyzer_free(FFTAnalyzer* analyzer)
 // returns number of elements pushed onto its history
 SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
 {
-    const SizeType to_keep = analyzer->size - analyzer->stride;
-    const SizeType to_read = analyzer->stride;
+    const SizeType to_keep = analyzer->cfg.size - analyzer->cfg.stride;
+    const SizeType to_read = analyzer->cfg.stride;
 
     SizeType n = 0;
     while (clfq_pop(&analyzer->rx, analyzer->input + to_keep, to_read)) {
@@ -139,7 +137,7 @@ FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
                           float h,
                           Vector2 origin)
 {
-    const SizeType size = analyzer->size;
+    const SizeType size = analyzer->cfg.size;
     const SizeType n_bins = analyzer->history.n_bins;
 
     Image img = GenImageColor(size, n_bins, BLACK);
@@ -266,9 +264,15 @@ int main(int ac, const char** av)
     }
 
     // analyzer
+    const FFTConfig fft_config = {
+        .size = FFT_SIZE,
+        .stride = FFT_SIZE / 2,
+        .dc_blocker_frequency = 10.0f,  // 10 Hz
+        .history_size = HISTORY_SIZE,
+        .sample_rate = music.stream.sampleRate,
+    };
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
-    FFTAnalyzer analyzer = fft_analyzer_new(music.stream.sampleRate, sample_rx,
-                                            FFT_SIZE, FFT_SIZE / 2);
+    FFTAnalyzer analyzer = fft_analyzer_new(&fft_config, sample_rx);
 
     // visualizer
     FFTVisualizer visualizer = fft_vis_new(
