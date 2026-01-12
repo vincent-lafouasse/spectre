@@ -167,27 +167,34 @@ void fft_vis_destroy(FFTVisualizer* fv)
     UnloadTexture(fv->texture);
     free(fv->column_buffer);
 }
+
+static Color fft_vis_assign_color(const FFTVisualizer* fv, Complex bin)
+{
+    Colormap cmap = plasma_rgba;
+
+    const float fft_size = 2 * fv->n_bins;
+    const float reference_power = fft_size * fft_size / 4.0f;
+    const float min_db = -60.0f;
+
+    const float re = crealf(bin);
+    const float im = cimagf(bin);
+
+    const float power = re * re + im * im;
+    const float db = 10.0f * log10f((power / reference_power) + 1e-9f);
+
+    // scale [min_db, reference_power] to [0, 1]
+    // reference_power would appear here but it's 0dB by definition
+    const float intensity = (db - min_db) / (-min_db);
+
+    return float_to_color(intensity, cmap, COLORMAP_SIZE);
+}
+
 static void fft_vis_update_column(FFTVisualizer* fv,
                                   const Complex* bins,
                                   SizeType index)
 {
-    Colormap cmap = plasma_rgba;
-
-    const float reference_power = (float)(fv->size * fv->size) / 4.0f;
-    const float min_db = -60.0f;
-
     for (SizeType b = 0; b < fv->n_bins; b++) {
-        const float re = crealf(bins[b]);
-        const float im = cimagf(bins[b]);
-
-        const float power = re * re + im * im;
-        const float db = 10.0f * log10f((power / reference_power) + 1e-9f);
-
-        // scale [min_db, reference_power] to [0, 1]
-        // reference_power would appear here but it's 0dB by definition
-        const float intensity = (db - min_db) / (-min_db);
-
-        fv->column_buffer[b] = float_to_color(intensity, cmap, COLORMAP_SIZE);
+        fv->column_buffer[b] = fft_vis_assign_color(fv, bins[b]);
     }
 
     UpdateTextureRec(fv->texture,
