@@ -22,6 +22,9 @@
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
 typedef struct {
+    SizeType size;
+    SizeType stride;
+
     fftwf_plan plan;
     float* input;
     Complex* output;
@@ -33,20 +36,24 @@ typedef struct {
     float sample_rate;
 } FFTAnalyzer;
 
-FFTAnalyzer fft_analyzer_new(float sample_rate, LockFreeQueueConsumer rx)
+FFTAnalyzer fft_analyzer_new(float sample_rate,
+                             LockFreeQueueConsumer rx,
+                             SizeType size,
+                             SizeType stride)
 {
-    float* input = fftwf_alloc_real(FFT_SIZE);
-    Complex* output = fftwf_alloc_complex(1 + (FFT_SIZE / 2));
-    fftwf_plan plan =
-        fftwf_plan_dft_r2c_1d(FFT_SIZE, input, output, FFTW_MEASURE);
+    float* input = fftwf_alloc_real(size);
+    Complex* output = fftwf_alloc_complex(1 + (size / 2));
+    fftwf_plan plan = fftwf_plan_dft_r2c_1d(size, input, output, FFTW_MEASURE);
 
-    const SizeType n_bins = FFT_SIZE / 2;  // ditch the DC information
+    const SizeType n_bins = size / 2;  // ditch the DC information
     FFTHistory history = fft_history_new(HISTORY_SIZE, n_bins);
 
     const float dc_frequency_cutoff = 10.0f;  // 10 Hz
     OnePoleFilter dc_blocker = filter_init(dc_frequency_cutoff, sample_rate);
 
     return (FFTAnalyzer){
+        .size = size,
+        .stride = stride,
         .plan = plan,
         .input = input,
         .output = output,
