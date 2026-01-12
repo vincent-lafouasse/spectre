@@ -108,6 +108,8 @@ SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
     return n;
 }
 
+#include "colormap/colormap.h"
+
 typedef struct {
     Texture2D texture;
     float height, width;
@@ -164,6 +166,30 @@ void fft_vis_destroy(FFTVisualizer* fv)
 
     UnloadTexture(fv->texture);
     free(fv->column_buffer);
+}
+static void fft_vis_update_column(FFTVisualizer* fv,
+                                  const Complex* bins,
+                                  SizeType index)
+{
+    const uint8_t(*const cmap)[4] = plasma_rgba;
+
+    const float reference_power = (float)(fv->size * fv->size) / 4.0f;
+    const float min_db = -60.0f;
+
+    for (SizeType b = 0; b < fv->n_bins; b++) {
+        const float re = crealf(bins[b]);
+        const float im = cimagf(bins[b]);
+
+        const float power = re * re + im * im;
+        const float db = 10.0f * log10f((power / reference_power) + 1e-9f);
+        const float intensity = (db - min_db) / (-min_db);
+
+        fv->column_buffer[b] = float_to_color(intensity, cmap, COLORMAP_SIZE);
+    }
+
+    UpdateTextureRec(fv->texture,
+                     (Rectangle){(float)index, 0, 1, (float)fv->n_bins},
+                     fv->column_buffer);
 }
 
 void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n);
