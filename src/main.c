@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <complex.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -113,6 +114,20 @@ typedef struct {
     Vector2 origin;
     SizeType size, n_bins;
 } FFTVisualizer;
+
+static float clamp_unit(float f)
+{
+    return fminf(fmaxf(f, 0.0f), 1.0f);
+}
+
+static Color float_to_color(float intensity,
+                            const uint8_t (*const cmap)[4],
+                            SizeType cmap_size)
+{
+    const float clamped = clamp_unit(intensity);
+    const int index = (int)(clamped * (cmap_size - 0.0001f));
+    return *(Color*)cmap[index];
+}
 
 FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
                           float w,
