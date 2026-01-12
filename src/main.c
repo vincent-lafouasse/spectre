@@ -214,7 +214,25 @@ void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n)
     }
 }
 
-void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h);
+void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h)
+{
+    const SizeType filled_columns = (h->len < h->cap) ? h->tail : h->cap;
+    const Rectangle src = {0, 0, (float)filled_columns, (float)fv->n_bins};
+
+    const float screen_draw_width =
+        (filled_columns / (float)h->cap) * fv->width;
+    const Rectangle dest = {fv->origin.x, fv->origin.y, screen_draw_width,
+                            fv->height};
+
+    DrawTexturePro(fv->texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+
+    if (h->len >= h->cap) {
+        const float cursor_x =
+            fv->origin.x + ((float)h->tail / h->cap) * fv->width;
+        DrawLineV((Vector2){cursor_x, fv->origin.y},
+                  (Vector2){cursor_x, fv->origin.y + fv->height}, RED);
+    }
+}
 
 int main(int ac, const char** av)
 {
