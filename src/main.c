@@ -11,6 +11,7 @@
 #include "RMSAnalyzer.h"
 #include "RMSVisualizer.h"
 #include "audio_callback.h"
+#include "colormap/palette.h"
 #include "core/LockFreeQueue.h"
 #include "definitions.h"
 #include "dsp/filters.h"
@@ -248,7 +249,7 @@ int main(int ac, const char** av)
 
         {
             BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(BACKGROUND_COLOR);
             rms_vis_render_wrap(&visualizer, &rms_analyzer.history);
             EndDrawing();
         }
