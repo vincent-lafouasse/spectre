@@ -117,8 +117,35 @@ typedef struct {
 FFTVisualizer fft_vis_new(const FFTAnalyzer* analyzer,
                           float w,
                           float h,
-                          Vector2 origin);
-void fft_vis_destroy(FFTVisualizer* fv);
+                          Vector2 origin)
+{
+    const SizeType size = analyzer->size;
+    const SizeType n_bins = analyzer->history.n_bins;
+
+    Image img = GenImageColor(size, n_bins, BLACK);
+    Texture2D texture = LoadTextureFromImage(img);
+    UnloadImage(img);
+    SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
+
+    return (FFTVisualizer){
+        .texture = texture,
+        .height = h,
+        .width = w,
+        .origin = origin,
+        .size = size,
+        .n_bins = n_bins,
+    };
+}
+
+void fft_vis_destroy(FFTVisualizer* fv)
+{
+    if (!fv) {
+        return;
+    }
+
+    UnloadTexture(fv->texture);
+}
+
 void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n);
 void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h);
 
