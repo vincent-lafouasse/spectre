@@ -14,7 +14,7 @@ COLORMAP_SIZE = 256
 
 
 def array_declaration(cmap_name):
-    return f"const unsigned char {cmap_name}_rgba[{COLORMAP_SIZE}][4]"
+    return f"const uint8_t {cmap_name}_rgba[{COLORMAP_SIZE}][4]"
 
 
 def dump_inc(cmap_name):

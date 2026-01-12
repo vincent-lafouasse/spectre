@@ -1,5 +1,5 @@
 // Matplotlib viridis
-const unsigned char viridis_rgba[256][4] = {
+const uint8_t viridis_rgba[256][4] = {
     { 68,   1,  84, 255},
     { 68,   2,  86, 255},
     { 69,   4,  87, 255},

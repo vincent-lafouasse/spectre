@@ -6,7 +6,7 @@
 
 typedef const uint8_t (*const Colormap)[4];
 
-extern const unsigned char viridis_rgba[256][4];
-extern const unsigned char plasma_rgba[256][4];
-extern const unsigned char inferno_rgba[256][4];
-extern const unsigned char magma_rgba[256][4];
+extern const uint8_t viridis_rgba[256][4];
+extern const uint8_t plasma_rgba[256][4];
+extern const uint8_t inferno_rgba[256][4];
+extern const uint8_t magma_rgba[256][4];
