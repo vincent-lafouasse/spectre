@@ -171,7 +171,7 @@ static void fft_vis_update_column(FFTVisualizer* fv,
                                   const Complex* bins,
                                   SizeType index)
 {
-    const uint8_t(*const cmap)[4] = plasma_rgba;
+    const uint8_t (*const cmap)[4] = plasma_rgba;
 
     const float reference_power = (float)(fv->size * fv->size) / 4.0f;
     const float min_db = -60.0f;
