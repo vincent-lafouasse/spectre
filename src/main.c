@@ -2,6 +2,7 @@
 #include <complex.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <fftw3.h>
 #include <raylib.h>
@@ -42,8 +43,10 @@ FFTAnalyzer fft_analyzer_new(float sample_rate,
                              SizeType stride)
 {
     float* input = fftwf_alloc_real(size);
+    memset(input, 0, sizeof(*input) * size);
     Complex* output = fftwf_alloc_complex(1 + (size / 2));
-    fftwf_plan plan = fftwf_plan_dft_r2c_1d(size, input, output, FFTW_MEASURE);
+    fftwf_plan plan = fftwf_plan_dft_r2c_1d(size, input, output,
+                                            FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 
     const SizeType n_bins = size / 2;  // ditch the DC information
     FFTHistory history = fft_history_new(HISTORY_SIZE, n_bins);
@@ -77,7 +80,32 @@ void fft_analyzer_free(FFTAnalyzer* analyzer)
 }
 
 // returns number of elements pushed onto its history
-SizeType fft_analyzer_update(FFTAnalyzer* analyzer);
+SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
+{
+    const SizeType to_keep = analyzer->size - analyzer->stride;
+    const SizeType to_read = analyzer->stride;
+
+    SizeType n = 0;
+    while (clfq_pop(&analyzer->rx, analyzer->input + to_keep, to_read)) {
+        // no window, i want to see what happens when there's no windowing
+
+        // HPF the slice we just pulled
+        filter_hpf_process(&analyzer->dc_blocker, analyzer->input + to_keep,
+                           to_read);
+
+        // fft
+        fftwf_execute(analyzer->plan);
+
+        // ditch DC bin
+        fft_history_push(&analyzer->history, analyzer->output + 1);
+
+        // ditch the first to_read samples
+        memmove(analyzer->input, analyzer->input + to_read, to_keep);
+        ++n;
+    }
+
+    return n;
+}
 
 int main(int ac, const char** av)
 {
