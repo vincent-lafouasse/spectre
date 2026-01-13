@@ -1,4 +1,4 @@
-# spectre - an ogg spectrogram generator
+# spectre - a real-time spectrogram visualizer
 
 creeper? aw man
 
