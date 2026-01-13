@@ -12,7 +12,6 @@
 #include "core/History.h"
 #include "core/LockFreeQueue.h"
 #include "definitions.h"
-#include "dsp/filters.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
