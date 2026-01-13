@@ -80,6 +80,7 @@ FFTVisualizerConfig fft_vis_config(SizeType n_freq_bands,
 typedef struct {
     Texture2D texture;
     Color* column_buffer;  // precomputed buffer to move data from CPU to GPU
+    const float* frequencies;  // the frequencies to interpolate from FFT bins
     FFTVisualizerConfig cfg;
 } FFTVisualizer;
 
@@ -104,9 +105,19 @@ FFTVisualizer fft_vis_new(const FFTVisualizerConfig* cfg)
 
     Color* column_buffer = malloc(sizeof(Color) * cfg->logical_height);
 
+    // f[n]/f[n-1] := C => C = (f_max/f_min)^(1/(N-1))
+    float* frequencies = malloc(sizeof(float) * cfg->logical_height);
+    const float factor =
+        powf(cfg->f_max / cfg->f_min, 1.0f / (cfg->logical_height - 1));
+    frequencies[0] = cfg->f_min;
+    for (SizeType i = 1; i < cfg->logical_height; i++) {
+        frequencies[i] = factor * frequencies[i - 1];
+    }
+
     return (FFTVisualizer){
         .texture = texture,
         .column_buffer = column_buffer,
+        .frequencies = frequencies,
         .cfg = *cfg,
     };
 }
@@ -119,6 +130,7 @@ void fft_vis_destroy(FFTVisualizer* fv)
 
     UnloadTexture(fv->texture);
     free(fv->column_buffer);
+    free((void*)fv->frequencies);
 }
 
 static Color fft_vis_assign_color(const FFTVisualizer* fv, Complex bin)
