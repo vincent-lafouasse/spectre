@@ -32,6 +32,7 @@ typedef struct {
     Colormap cmap;
 
     // some cached values
+    const float Q; // f / bandwith => bandwidth = f * Q. depends only on BPO
     const SizeType fft_size;
     const SizeType fft_n_bins;
     const float log_f_min;
