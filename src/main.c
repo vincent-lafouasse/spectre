@@ -147,7 +147,7 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
 
 float frequency_weight(float f, float f_c, float sigma)
 {
-    float distance = (f > f_c) ? log2f(f / f_c) : log2f(f_c / f);
+    const float distance = fabs(log2f(f / f_c));
 
     return expf(-0.5f * distance * distance / (sigma * sigma));
 }
