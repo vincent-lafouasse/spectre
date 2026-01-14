@@ -72,6 +72,10 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // constant Q => adaptative bandwidths (musical)
     // dictates the width of the gaussian that sets the weight of FFT bins as a
     // function of the (log?) frequency offset
+    //
+    // BW[n] = f[n + 1] - f[n] = r * f[n] - f[n] = f[n] (r - 1)
+    // => Q = f[n]/BW[n] = 1 / (r - 1)
+    const float Q = 1.0f / (freq_ratio - 1.0f);
 
     return (LogSpectrogramConfig){
         .screen = panel,
@@ -82,7 +86,7 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
         .f_max = f_max,
         .cmap = plasma_rgba,
 
-        .Q = TODO(float),
+        .Q = Q,
         .sharpness = 2.5f,  // idk
         .freq_ratio = freq_ratio,
         .fft_size = fft_size,
