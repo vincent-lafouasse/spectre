@@ -87,7 +87,6 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
     // the gaussian
     const float band_cutoff = 0.5f;  // -3 dB
 
-    //
     // first, what's the distance to the next band ?
     // dist2(f[n+1], f[n]) = dist2(r * f[n], f[n]) = log2(r) = 1/BPO
     // makes sense, e.g. if 12-TET, the next bin is 1/12 octave away
@@ -98,17 +97,12 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
     // ie r * f[n] / f_end = f_end / f[n]
     // ie f_end^2 = r * f[n]^2
     // ie f_end = sqrt(r) * f[n]
-    //
-    // with d(end, center) = log2(sqrt(r)) = 1/2 log2(r) = 1/2 * 1/BPO
-    //
-    // resp, dist(f_start, f[n-1]) = dist(f[n], f_start)
-    // => f_start^2 = f[n] * f[n-1] = f[n]^2 / r
-    // => f_start = sqrt(1/r) f[n]
+    // and f_start = f[n] / sqrt(r)
     //
     // this is just the geometric mean/midpoint lol, well at least i'm sure of
     // myself
     //
-    // anw, we want G(f_end) = cutoff
+    // anw, we want G(f_end) = cutoff = 0.5f for the base sigma
     // where G(f) = exp(-0.5 * d^2 / sigma^2)
     // where d = 1 / 2BPO
     //
