@@ -158,7 +158,7 @@ float frequency_weight(float f, float f_c, float sigma)
 // store as a start bin + number of bins in the band
 // + the center frequency for monitoring
 //
-// ok i said partition but they're actually overlap for smoothness
+// ok i said partition but they actually overlap for smoothness
 typedef struct {
     // struct of arrays
     const SizeType n_bands;
