@@ -166,7 +166,6 @@ typedef struct {
     SizeType* band_len;         // [n_bands]
     float* weights;             // [sum n_bands]
     float* center_frequencies;  // opt. metadata
-    float* bandwidth;           // constant Q => adaptative bandwidth
 } FrequencyBands;
 
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg);
