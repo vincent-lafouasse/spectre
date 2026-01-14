@@ -35,8 +35,6 @@ typedef struct {
 
     // some cached values
     const float Q;  // f / bandwith => bandwidth = f * Q. depends only on BPO
-    const float sharpness;   // scales the gaussian sigma from Q. lower means
-                             // more overlap
     const float freq_ratio;  // f[n+1]/f[n]
     const SizeType fft_size;
     const SizeType fft_n_bins;
@@ -137,7 +135,6 @@ LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
         .cmap = plasma_rgba,
 
         .Q = Q,
-        .sharpness = 2.5f,  // idk
         .freq_ratio = freq_ratio,
         .fft_size = fft_size,
         .fft_n_bins = fft_size / 2,
