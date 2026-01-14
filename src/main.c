@@ -20,13 +20,13 @@
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
-/*
 typedef struct {
     // the actual config
     const Rectangle screen;
     const SizeType logical_height;  // the number of frequency bands to
                                     // interpolate from the FFT bins
     const SizeType logical_width;   // number of datapoints
+    const SizeType bins_per_octave;
     const float f_min;
     const float f_max;
     Colormap cmap;
@@ -38,19 +38,28 @@ typedef struct {
     const float log_f_max;
     const float power_reference;  // defines 0dB
     const float min_dB;           // cut stuff below -60dB or something
-} LogFFTVisualizerConfig;
+} LogSpectrogramConfig;
+
+LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
+                                            Rectangle panel,
+                                            const FFTAnalyzer* analyzer);
 
 // partition the FFT bins into (geometric) frequency bands
 // store as a start bin + number of bins in the band
 // + the center frequency for monitoring
+//
+// ok i said partition but they're actually overlap for smoothness
 typedef struct {
     // struct of arrays
     const SizeType n_bands;
-    SizeType* start_bin;
-    SizeType* band_len;
+    SizeType* band_start;       // [n_bands]
+    SizeType* band_len;         // [n_bands]
+    float* weights;             // [sum n_bands]
     float* center_frequencies;  // opt. metadata
-} GeometricBins;
-*/
+    float* bandwidth;           // constant Q => adaptative bandwidth
+} FrequencyBands;
+
+FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg);
 
 int main(int ac, const char** av)
 {
