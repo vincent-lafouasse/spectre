@@ -7,6 +7,7 @@
 #include <raylib.h>
 
 #include "FFTAnalyzer.h"
+#include "LinearSpectrogram.h"
 #include "audio_callback.h"
 #include "colormap/palette.h"
 #include "core/History.h"
@@ -53,21 +54,6 @@ typedef struct {
 } GeometricBins;
 */
 
-#include "colormap/colormap.h"
-
-typedef struct {
-    // the actual config
-    const Rectangle screen;
-    const SizeType logical_height;  // aliases the number of FFT bins
-    const SizeType
-        logical_width;  // number of datapoints, aliases the history size
-    Colormap cmap;
-
-    // some cached values
-    const float power_reference;  // defines 0dB
-    const float min_dB;
-} LinearSpectrogramConfig;
-
 LinearSpectrogramConfig linear_spectrogram_config(Rectangle screen,
                                                   Colormap cmap,
                                                   const FFTConfig* analyzer_cfg)
@@ -88,12 +74,6 @@ LinearSpectrogramConfig linear_spectrogram_config(Rectangle screen,
         .cmap = cmap,
     };
 }
-
-typedef struct {
-    Texture2D texture;
-    Color* column_buffer;  // precomputed buffer to move data from CPU to GPU
-    const LinearSpectrogramConfig cfg;
-} LinearSpectrogram;
 
 static float clamp_unit(float f)
 {
