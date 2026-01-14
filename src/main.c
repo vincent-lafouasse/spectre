@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,9 +42,35 @@ typedef struct {
     const float min_dB;           // cut stuff below -60dB or something
 } LogSpectrogramConfig;
 
+#define TODO(T) ((T){0})
+
 LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
                                             Rectangle panel,
-                                            const FFTAnalyzer* analyzer);
+                                            const FFTAnalyzer* analyzer)
+{
+    const float f_min = 20.0f;
+    const float f_max = 20000.0f;
+
+    const SizeType fft_size = analyzer->cfg.size;
+
+    return (LogSpectrogramConfig){
+        .screen = panel,
+        .logical_height = TODO(SizeType),
+        .logical_width = analyzer->history.cap,
+        .bins_per_octave = bins_per_octave,
+        .f_min = f_min,
+        .f_max = f_max,
+        .cmap = plasma_rgba,
+
+        .Q = TODO(float),
+        .fft_size = fft_size,
+        .fft_n_bins = fft_size / 2,
+        .log_f_min = log10f(f_min),
+        .log_f_max = log10f(f_max),
+        .power_reference = 0.25f * (float)(fft_size * fft_size),  // parseval
+        .min_dB = -60.0f,
+    };
+}
 
 // partition the FFT bins into (geometric) frequency bands
 // store as a start bin + number of bins in the band
