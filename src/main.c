@@ -36,13 +36,10 @@ typedef struct {
     // some cached values
     const float Q;  // f / bandwith => bandwidth = f * Q. depends only on BPO
     const float sigma;  // the gaussian that computes weights
-    const float band_cutoff;
     const float freq_ratio;  // f[n+1]/f[n]
     const float sample_rate;
     const SizeType fft_size;
     const SizeType fft_n_bins;
-    const float log_f_min;
-    const float log_f_max;
     const float power_reference;  // defines 0dB
     const float min_dB;           // cut stuff below -60dB or something
 } LogSpectrogramConfig;
@@ -144,13 +141,10 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
 
         .Q = Q,
         .sigma = sigma,
-        .band_cutoff = band_cutoff,
         .freq_ratio = freq_ratio,
         .fft_size = fft_size,
         .sample_rate = analyzer->cfg.sample_rate,
         .fft_n_bins = fft_size / 2,
-        .log_f_min = log10f(f_min),
-        .log_f_max = log10f(f_max),
         .power_reference = 0.25f * (float)(fft_size * fft_size),  // parseval
         .min_dB = -60.0f,
     };
