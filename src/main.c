@@ -37,6 +37,7 @@ typedef struct {
     const float Q;  // f / bandwith => bandwidth = f * Q. depends only on BPO
     const float sigma;       // the gaussian that computes weights
     const float freq_ratio;  // f[n+1]/f[n]
+    const float sample_rate;
     const SizeType fft_size;
     const SizeType fft_n_bins;
     const float log_f_min;
@@ -139,6 +140,7 @@ LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
         .sigma = sigma,
         .freq_ratio = freq_ratio,
         .fft_size = fft_size,
+        .sample_rate = analyzer->cfg.sample_rate,
         .fft_n_bins = fft_size / 2,
         .log_f_min = log10f(f_min),
         .log_f_max = log10f(f_max),
