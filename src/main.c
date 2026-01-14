@@ -215,6 +215,23 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     }
     assert(index == weight_count);
 
+    // normalize
+    SizeType start = 0;
+    for (SizeType i = 0; i < n_bands; i++) {
+        const SizeType len = band_len[i];
+
+        float sum = 0.0f;
+        for (SizeType j = 0; j < len; j++) {
+            sum += weights[start + j];
+        }
+        for (SizeType j = 0; j < len; j++) {
+            weights[start + j] /= sum;
+        }
+
+        start += len;
+    }
+    assert(start == weight_count);
+
     return (FrequencyBands){
         .n_bands = n_bands,
         .band_start = band_start,
