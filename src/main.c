@@ -77,6 +77,17 @@ FFTVisualizerConfig fft_vis_config(SizeType n_freq_bands,
     };
 }
 
+// partition the FFT bins into (geometric) frequency bands
+// store as a start bin + number of bins in the band
+// + the center frequency for monitoring
+typedef struct {
+    // struct of arrays
+    const SizeType n_bands;
+    SizeType* start_bin;
+    SizeType* band_len;
+    float* center_frequencies;  // opt. metadata
+} GeometricBins;
+
 typedef struct {
     Texture2D texture;
     Color* column_buffer;  // precomputed buffer to move data from CPU to GPU
