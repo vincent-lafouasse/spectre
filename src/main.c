@@ -81,7 +81,7 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // bandwidth
     //
     // we will select FFT bins based on the value of a gaussian centered on f_c
-    const float cutoff_value = 0.5f; // -3 dB
+    const float cutoff_value = 0.5f;  // -3 dB
 
     // we will find where the band end (f_end) and compute sigma by inverting
     // the gaussian
@@ -116,7 +116,8 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // sigma = d * C^-1/2
     // sigma = (1 / 2BPO) / sqrt(C)
     assert(cutoff_value < 1.0f && cutoff_value > 0.0f);
-    const float sigma = (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(cutoff_value));
+    const float sigma =
+        (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(cutoff_value));
     assert(sigma > 0.0f);
 
     // A.N. : 12-TET with -3 dB cutoff
@@ -145,6 +146,13 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
         .power_reference = 0.25f * (float)(fft_size * fft_size),  // parseval
         .min_dB = -60.0f,
     };
+}
+
+float frequency_weight(float f, float f_c, float sigma)
+{
+    float distance = (f > f_c) ? log2f(f / f_c) : log2f(f_c / f);
+
+    return expf(-0.5f * distance * distance / (sigma * sigma));
 }
 
 // partition the FFT bins into (geometric) frequency bands
