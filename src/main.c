@@ -164,6 +164,8 @@ float frequency_weight(float f, float f_c, float sigma)
 typedef struct {
     // struct of arrays
     const SizeType n_bands;
+    // partition the fft bins
+    // note that index 0 is not DC, we ditched the DC bin
     SizeType* band_start;       // [n_bands]
     SizeType* band_len;         // [n_bands]
     float* weights;             // [sum n_bands]
@@ -178,7 +180,7 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
     float* center_frequencies = malloc(sizeof(float) * n_bands);
 
-    const float fft_bw = 0;
+    const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
 }
 
 int main(int ac, const char** av)
