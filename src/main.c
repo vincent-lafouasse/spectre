@@ -34,8 +34,9 @@ typedef struct {
     Colormap cmap;
 
     // some cached values
-    const float Q;  // f / bandwith => bandwidth = f * Q. depends only on BPO
-    const float sigma;  // the gaussian that computes weights
+    const float Q;  // Q = f / bandwidth
+    // constant Q => adaptative bandwidth
+    const float sigma;       // the gaussian that computes weights
     const float freq_ratio;  // f[n+1]/f[n]
     const float sample_rate;
     const SizeType fft_size;
@@ -84,7 +85,7 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
     // we will select FFT bins based on the value of a gaussian centered on f_c
     // we will find where the band end (f_end) and compute sigma by inverting
     // the gaussian
-    const float band_cutoff = 0.5f; // -3 dB
+    const float band_cutoff = 0.5f;  // -3 dB
 
     //
     // first, what's the distance to the next band ?
