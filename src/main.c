@@ -53,9 +53,26 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
 
     const SizeType fft_size = analyzer->cfg.size;
 
+    // BPO => 2 = freq_ratio^(BPO), e.g. 12-TET => r = 2^(1/12)
+    // => freq_ratio = 2^(1/BPO)
+    const float freq_ratio = powf(2.0f, 1.0f / (float)(bins_per_octave));
+
+    // \forall n, f[n] = r^n * f_min
+    // => f_max = f[H-1] = r^(H-1) f_min
+    // => log2(f_max/f_min) = (H-1) * log2(r)
+    //                      = (H-1) * 1/BPO
+    // => H = 1 + BPO * log2(max/min)
+    const float logical_height =
+        1 + (float)(bins_per_octave)*log2f(f_max / f_min);
+
+    // Q of band `n` = f[n] / bandwidth[n]
+    // constant Q => adaptative bandwidths (musical)
+    // dictates the width of the gaussian that sets the weight of FFT bins as a
+    // function of the (log?) frequency offset
+
     return (LogSpectrogramConfig){
         .screen = panel,
-        .logical_height = TODO(SizeType),
+        .logical_height = logical_height,
         .logical_width = analyzer->history.cap,
         .bins_per_octave = bins_per_octave,
         .f_min = f_min,
