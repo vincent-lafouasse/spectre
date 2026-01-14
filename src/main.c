@@ -162,9 +162,15 @@ typedef struct {
     const SizeType n_bands;
     // partition the fft bins
     // note that index 0 is not DC, we ditched the DC bin
-    SizeType* band_start;       // [n_bands]
-    SizeType* band_len;         // [n_bands]
-    float* weights;             // [sum n_bands]
+    SizeType* band_start;  // [n_bands]
+    SizeType* band_len;    // [n_bands]
+    float* weights;        // [sum n_bands]
+    // optional metadata
+    // offsets are such that the weights of band `i` is found at
+    // weights[offset + k]
+    //     with offset = weight_offsets[i]
+    //     k in [0, band_len[i][
+    SizeType* weight_offsets;   // [n_bands]
     float* center_frequencies;  // opt. metadata
 } FrequencyBands;
 
@@ -182,6 +188,7 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
     SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
+    SizeType* weight_offsets = malloc(sizeof(SizeType) * n_bands);
 
     SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
@@ -196,41 +203,39 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 
         band_start[i] = (start_bin < 0) ? 0 : (SizeType)start_bin;
         band_len[i] = end - band_start[i];
+        weight_offsets[i] = weight_count;
+
         weight_count += band_len[i];
     }
 
     float* weights = malloc(sizeof(float) * weight_count);
-    SizeType index = 0;
     for (SizeType i = 0; i < n_bands; i++) {
         const float f_c = center_frequencies[i];
-        const SizeType start = band_start[i];
+        const SizeType fft_start = band_start[i];
         const SizeType len = band_len[i];
+        const SizeType weight_offset = weight_offsets[i];
 
         for (SizeType j = 0; j < len; j++) {
-            const SizeType fft_bin = start + j;
+            const SizeType fft_bin = fft_start + j;
             const float f = (float)fft_bin * fft_bw;
             const float w = frequency_weight(f, f_c, cfg->sigma);
-            weights[index++] = w;
+            weights[weight_offset + j] = w;
         }
     }
-    assert(index == weight_count);
 
     // normalize
-    SizeType start = 0;
     for (SizeType i = 0; i < n_bands; i++) {
+        const SizeType offset = weight_offsets[i];
         const SizeType len = band_len[i];
 
         float sum = 0.0f;
         for (SizeType j = 0; j < len; j++) {
-            sum += weights[start + j];
+            sum += weights[offset + j];
         }
         for (SizeType j = 0; j < len; j++) {
-            weights[start + j] /= sum;
+            weights[offset + j] /= sum;
         }
-
-        start += len;
     }
-    assert(start == weight_count);
 
     return (FrequencyBands){
         .n_bands = n_bands,
