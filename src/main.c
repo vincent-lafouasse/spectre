@@ -35,7 +35,7 @@ typedef struct {
 
     // some cached values
     const float Q;  // f / bandwith => bandwidth = f * Q. depends only on BPO
-    const float sigma;       // the gaussian that computes weights
+    const float sigma;  // the gaussian that computes weights
     const float band_cutoff;
     const float freq_ratio;  // f[n+1]/f[n]
     const float sample_rate;
@@ -187,6 +187,12 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
     SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
+
+    for (SizeType i = 0; i < n_bands; i++) {
+        const float f_c = center_frequencies[i];
+        float f_start;
+        float f_end;
+    }
 }
 
 int main(int ac, const char** av)
