@@ -49,7 +49,9 @@ typedef struct {
 
 #define TODO(T) ((T){0})
 
-LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
+// sharpness multiplies the gaussian sigma
+// so higher sharpness mean narrower bands
+LogSpectrogramConfig log_spectrogram_config(float sharpness,
                                             SizeType bins_per_octave,
                                             Rectangle panel,
                                             const FFTAnalyzer* analyzer)
@@ -85,7 +87,7 @@ LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
     // we will select FFT bins based on the value of a gaussian centered on f_c
     // we will find where the band end (f_end) and compute sigma by inverting
     // the gaussian
-    assert(band_cutoff < 1.0f && band_cutoff > 0.0f);
+    const float band_cutoff = 0.5f; // -3 dB
 
     //
     // first, what's the distance to the next band ?
@@ -117,9 +119,12 @@ LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
     // ie sigma^2 = d^2 / C
     // sigma = d * C^-1/2
     // sigma = (1 / 2BPO) / sqrt(C)
-    const float sigma =
+    const float base_sigma =
         (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(band_cutoff));
-    assert(sigma > 0.0f);
+    assert(base_sigma > 0.0f);
+
+    assert(sharpness > 0.0f);
+    const float sigma = base_sigma * sharpness;
 
     // A.N. : 12-TET with -3 dB cutoff
     // => BPO = 12 => d = 1/24
