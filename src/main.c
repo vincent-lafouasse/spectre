@@ -55,7 +55,6 @@ typedef struct {
 
 #include "colormap/colormap.h"
 
-// linear spectrogram
 typedef struct {
     // the actual config
     const Rectangle screen;
@@ -67,11 +66,11 @@ typedef struct {
     // some cached values
     const float power_reference;  // defines 0dB
     const float min_dB;
-} LinearFFTVisualizerConfig;
+} LinearSpectrogramConfig;
 
-LinearFFTVisualizerConfig lin_fft_vis_config(Rectangle screen,
-                                             Colormap cmap,
-                                             const FFTConfig* analyzer_cfg)
+LinearSpectrogramConfig linear_spectrogram_config(Rectangle screen,
+                                                  Colormap cmap,
+                                                  const FFTConfig* analyzer_cfg)
 {
     const SizeType fft_size = analyzer_cfg->size;
     const SizeType logical_height = fft_size / 2;
@@ -80,7 +79,7 @@ LinearFFTVisualizerConfig lin_fft_vis_config(Rectangle screen,
     const float power_reference = 0.25f * (float)(fft_size * fft_size);
     const float min_dB = -60.0f;  // -60 dB should be quiet enough
 
-    return (LinearFFTVisualizerConfig){
+    return (LinearSpectrogramConfig){
         .screen = screen,
         .logical_height = logical_height,
         .logical_width = logical_width,
@@ -93,8 +92,8 @@ LinearFFTVisualizerConfig lin_fft_vis_config(Rectangle screen,
 typedef struct {
     Texture2D texture;
     Color* column_buffer;  // precomputed buffer to move data from CPU to GPU
-    const LinearFFTVisualizerConfig cfg;
-} LinearFFTVisualizer;
+    const LinearSpectrogramConfig cfg;
+} LinearSpectrogram;
 
 static float clamp_unit(float f)
 {
@@ -108,7 +107,7 @@ static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
     return *(Color*)cmap[index];
 }
 
-LinearFFTVisualizer lin_fft_vis_new(const LinearFFTVisualizerConfig* cfg)
+LinearSpectrogram linear_spectrogram_new(const LinearSpectrogramConfig* cfg)
 {
     Image img = GenImageColor(cfg->logical_width, cfg->logical_height, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
@@ -117,27 +116,27 @@ LinearFFTVisualizer lin_fft_vis_new(const LinearFFTVisualizerConfig* cfg)
 
     Color* column_buffer = malloc(sizeof(Color) * cfg->logical_height);
 
-    return (LinearFFTVisualizer){
+    return (LinearSpectrogram){
         .texture = texture,
         .column_buffer = column_buffer,
         .cfg = *cfg,
     };
 }
 
-void lin_fft_vis_destroy(LinearFFTVisualizer* fv)
+void linear_spectrogram_destroy(LinearSpectrogram* spec)
 {
-    if (!fv) {
+    if (!spec) {
         return;
     }
 
-    UnloadTexture(fv->texture);
-    free(fv->column_buffer);
+    UnloadTexture(spec->texture);
+    free(spec->column_buffer);
 }
 
-static Color lin_fft_vis_assign_color(const LinearFFTVisualizer* fv,
-                                      Complex bin)
+static Color linear_spectrogram_assign_color(const LinearSpectrogram* spec,
+                                             Complex bin)
 {
-    const LinearFFTVisualizerConfig* cfg = &fv->cfg;
+    const LinearSpectrogramConfig* cfg = &spec->cfg;
 
     const float re = crealf(bin);
     const float im = cimagf(bin);
@@ -152,25 +151,25 @@ static Color lin_fft_vis_assign_color(const LinearFFTVisualizer* fv,
     return float_to_color(intensity, cfg->cmap, COLORMAP_SIZE);
 }
 
-static void lin_fft_vis_update_column(LinearFFTVisualizer* fv,
-                                      const Complex* bins,
-                                      SizeType index)
+static void linear_spectrogram_update_column(LinearSpectrogram* spec,
+                                             const Complex* bins,
+                                             SizeType index)
 {
-    for (SizeType b = 0; b < fv->cfg.logical_height; b++) {
-        fv->column_buffer[b] = lin_fft_vis_assign_color(fv, bins[b]);
+    for (SizeType b = 0; b < spec->cfg.logical_height; b++) {
+        spec->column_buffer[b] = linear_spectrogram_assign_color(spec, bins[b]);
     }
 
     UpdateTextureRec(
-        fv->texture,
-        (Rectangle){(float)index, 0, 1, (float)fv->cfg.logical_height},
-        fv->column_buffer);
+        spec->texture,
+        (Rectangle){(float)index, 0, 1, (float)spec->cfg.logical_height},
+        spec->column_buffer);
 }
 
-void lin_fft_vis_update(LinearFFTVisualizer* fv,
-                        const FFTHistory* h,
-                        SizeType n)
+void linear_spectrogram_update(LinearSpectrogram* spec,
+                               const FFTHistory* h,
+                               SizeType n)
 {
-    // h->cap aliases fv->cfg.logical_width as the texture is the fft history
+    // h->cap aliases spec->cfg.logical_width as the texture is the fft history
     // but on the GPU. hence how `i` indexes both the history and the texture
     n = (n >= h->cap) ? h->cap : n;
     const SizeType start = (h->tail - n + h->cap) % h->cap;
@@ -178,22 +177,24 @@ void lin_fft_vis_update(LinearFFTVisualizer* fv,
     for (SizeType i = 0; i < n; i++) {
         const SizeType index = (start + i) % h->cap;
         const Complex* bins = fft_history_get_row(h, index);
-        lin_fft_vis_update_column(fv, bins, index);
+        linear_spectrogram_update_column(spec, bins, index);
     }
 }
 
-void lin_fft_vis_render_wrap(const LinearFFTVisualizer* fv, const FFTHistory* h)
+void linear_spectrogram_render_wrap(const LinearSpectrogram* spec,
+                                    const FFTHistory* h)
 {
     //                    REVERSED HORIZONTALLY v
-    const Rectangle src = {0, 0, (float)h->len, -(float)fv->cfg.logical_height};
+    const Rectangle src = {0, 0, (float)h->len,
+                           -(float)spec->cfg.logical_height};
 
-    const Rectangle* screen = &fv->cfg.screen;
+    const Rectangle* screen = &spec->cfg.screen;
     const float screen_draw_width =
         ((float)h->len / (float)h->cap) * screen->width;
     const Rectangle dest = {screen->x, screen->y, screen_draw_width,
                             screen->height};
 
-    DrawTexturePro(fv->texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+    DrawTexturePro(spec->texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
 
     if (h->len >= h->cap) {
         const float cursor_x =
@@ -242,16 +243,16 @@ int main(int ac, const char** av)
     LockFreeQueueConsumer sample_rx = clfq_consumer(sample_queue);
     FFTAnalyzer analyzer = fft_analyzer_new(&fft_config, sample_rx);
 
-    // visualizer
+    // spectrogram
     const Rectangle spectrogram_panel = {
         .x = 0,
         .y = 0,
         .width = WINDOW_WIDTH,
         .height = WINDOW_HEIGHT,
     };
-    LinearFFTVisualizerConfig vis_cfg =
-        lin_fft_vis_config(spectrogram_panel, plasma_rgba, &fft_config);
-    LinearFFTVisualizer visualizer = lin_fft_vis_new(&vis_cfg);
+    LinearSpectrogramConfig spectrogram_cfg =
+        linear_spectrogram_config(spectrogram_panel, plasma_rgba, &fft_config);
+    LinearSpectrogram spectrogram = linear_spectrogram_new(&spectrogram_cfg);
 
     PlayMusicStream(music);
     SetTargetFPS(60);
@@ -268,12 +269,12 @@ int main(int ac, const char** av)
 
         // pull samples from queue and push onto its history
         const SizeType processed = fft_analyzer_update(&analyzer);
-        lin_fft_vis_update(&visualizer, &analyzer.history, processed);
+        linear_spectrogram_update(&spectrogram, &analyzer.history, processed);
 
         {
             BeginDrawing();
             ClearBackground(BACKGROUND_COLOR);
-            lin_fft_vis_render_wrap(&visualizer, &analyzer.history);
+            linear_spectrogram_render_wrap(&spectrogram, &analyzer.history);
             EndDrawing();
         }
 
@@ -281,7 +282,7 @@ int main(int ac, const char** av)
     }
 
     fft_analyzer_free(&analyzer);
-    lin_fft_vis_destroy(&visualizer);
+    linear_spectrogram_destroy(&spectrogram);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
