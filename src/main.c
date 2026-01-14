@@ -21,8 +21,7 @@
 #define ALMOSTFULL_ALERT \
     ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
 
-#include "colormap/colormap.h"
-
+/*
 typedef struct {
     // the actual config
     const Rectangle screen;
@@ -40,42 +39,7 @@ typedef struct {
     const float log_f_max;
     const float power_reference;  // defines 0dB
     const float min_dB;           // cut stuff below -60dB or something
-} FFTVisualizerConfig;
-
-FFTVisualizerConfig fft_vis_config(SizeType n_freq_bands,
-                                   Rectangle screen,
-                                   Colormap cmap,
-                                   const FFTConfig* analyzer_cfg)
-{
-    const SizeType logical_height = n_freq_bands;
-    const SizeType logical_width = analyzer_cfg->history_size;
-    const float f_min = 20.0f;
-    const float f_max = 20000.0f;
-
-    const SizeType fft_size = analyzer_cfg->size;
-    const SizeType fft_n_bins = fft_size / 2;
-
-    const float log_f_min = log10f(f_min);
-    const float log_f_max = log10f(f_max);
-    // estimated using parseval
-    const float power_reference = 0.25f * (float)(fft_size * fft_size);
-    const float min_dB = -60.0f;  // -60 dB should be quiet enough
-
-    return (FFTVisualizerConfig){
-        .screen = screen,
-        .logical_height = logical_height,
-        .logical_width = logical_width,
-        .f_min = f_min,
-        .f_max = f_max,
-        .fft_size = fft_size,
-        .fft_n_bins = fft_n_bins,
-        .log_f_min = log_f_min,
-        .log_f_max = log_f_max,
-        .power_reference = power_reference,
-        .min_dB = min_dB,
-        .cmap = cmap,
-    };
-}
+} LogFFTVisualizerConfig;
 
 // partition the FFT bins into (geometric) frequency bands
 // store as a start bin + number of bins in the band
@@ -87,13 +51,50 @@ typedef struct {
     SizeType* band_len;
     float* center_frequencies;  // opt. metadata
 } GeometricBins;
+*/
+
+#include "colormap/colormap.h"
+
+// linear spectrogram
+typedef struct {
+    // the actual config
+    const Rectangle screen;
+    const SizeType logical_height;  // aliases the number of FFT bins
+    const SizeType
+        logical_width;  // number of datapoints, aliases the history size
+    Colormap cmap;
+
+    // some cached values
+    const float power_reference;  // defines 0dB
+    const float min_dB;
+} LinearFFTVisualizerConfig;
+
+LinearFFTVisualizerConfig lin_fft_vis_config(Rectangle screen,
+                                             Colormap cmap,
+                                             const FFTConfig* analyzer_cfg)
+{
+    const SizeType fft_size = analyzer_cfg->size;
+    const SizeType logical_height = fft_size / 2;
+    const SizeType logical_width = analyzer_cfg->history_size;
+
+    const float power_reference = 0.25f * (float)(fft_size * fft_size);
+    const float min_dB = -60.0f;  // -60 dB should be quiet enough
+
+    return (LinearFFTVisualizerConfig){
+        .screen = screen,
+        .logical_height = logical_height,
+        .logical_width = logical_width,
+        .power_reference = power_reference,
+        .min_dB = min_dB,
+        .cmap = cmap,
+    };
+}
 
 typedef struct {
     Texture2D texture;
     Color* column_buffer;  // precomputed buffer to move data from CPU to GPU
-    const float* frequencies;  // the frequencies to interpolate from FFT bins
-    FFTVisualizerConfig cfg;
-} FFTVisualizer;
+    const LinearFFTVisualizerConfig cfg;
+} LinearFFTVisualizer;
 
 static float clamp_unit(float f)
 {
@@ -107,7 +108,7 @@ static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
     return *(Color*)cmap[index];
 }
 
-FFTVisualizer fft_vis_new(const FFTVisualizerConfig* cfg)
+LinearFFTVisualizer lin_fft_vis_new(const LinearFFTVisualizerConfig* cfg)
 {
     Image img = GenImageColor(cfg->logical_width, cfg->logical_height, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
@@ -116,24 +117,14 @@ FFTVisualizer fft_vis_new(const FFTVisualizerConfig* cfg)
 
     Color* column_buffer = malloc(sizeof(Color) * cfg->logical_height);
 
-    // f[n]/f[n-1] := C => C = (f_max/f_min)^(1/(N-1))
-    float* frequencies = malloc(sizeof(float) * cfg->logical_height);
-    const float factor =
-        powf(cfg->f_max / cfg->f_min, 1.0f / (cfg->logical_height - 1));
-    frequencies[0] = cfg->f_min;
-    for (SizeType i = 1; i < cfg->logical_height; i++) {
-        frequencies[i] = factor * frequencies[i - 1];
-    }
-
-    return (FFTVisualizer){
+    return (LinearFFTVisualizer){
         .texture = texture,
         .column_buffer = column_buffer,
-        .frequencies = frequencies,
         .cfg = *cfg,
     };
 }
 
-void fft_vis_destroy(FFTVisualizer* fv)
+void lin_fft_vis_destroy(LinearFFTVisualizer* fv)
 {
     if (!fv) {
         return;
@@ -141,12 +132,12 @@ void fft_vis_destroy(FFTVisualizer* fv)
 
     UnloadTexture(fv->texture);
     free(fv->column_buffer);
-    free((void*)fv->frequencies);
 }
 
-static Color fft_vis_assign_color(const FFTVisualizer* fv, Complex bin)
+static Color lin_fft_vis_assign_color(const LinearFFTVisualizer* fv,
+                                      Complex bin)
 {
-    const FFTVisualizerConfig* cfg = &fv->cfg;
+    const LinearFFTVisualizerConfig* cfg = &fv->cfg;
 
     const float re = crealf(bin);
     const float im = cimagf(bin);
@@ -161,12 +152,12 @@ static Color fft_vis_assign_color(const FFTVisualizer* fv, Complex bin)
     return float_to_color(intensity, cfg->cmap, COLORMAP_SIZE);
 }
 
-static void fft_vis_update_column(FFTVisualizer* fv,
-                                  const Complex* bins,
-                                  SizeType index)
+static void lin_fft_vis_update_column(LinearFFTVisualizer* fv,
+                                      const Complex* bins,
+                                      SizeType index)
 {
     for (SizeType b = 0; b < fv->cfg.logical_height; b++) {
-        fv->column_buffer[b] = fft_vis_assign_color(fv, bins[b]);
+        fv->column_buffer[b] = lin_fft_vis_assign_color(fv, bins[b]);
     }
 
     UpdateTextureRec(
@@ -175,7 +166,9 @@ static void fft_vis_update_column(FFTVisualizer* fv,
         fv->column_buffer);
 }
 
-void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n)
+void lin_fft_vis_update(LinearFFTVisualizer* fv,
+                        const FFTHistory* h,
+                        SizeType n)
 {
     // h->cap aliases fv->cfg.logical_width as the texture is the fft history
     // but on the GPU. hence how `i` indexes both the history and the texture
@@ -185,11 +178,11 @@ void fft_vis_update(FFTVisualizer* fv, const FFTHistory* h, SizeType n)
     for (SizeType i = 0; i < n; i++) {
         const SizeType index = (start + i) % h->cap;
         const Complex* bins = fft_history_get_row(h, index);
-        fft_vis_update_column(fv, bins, index);
+        lin_fft_vis_update_column(fv, bins, index);
     }
 }
 
-void fft_vis_render_wrap(const FFTVisualizer* fv, const FFTHistory* h)
+void lin_fft_vis_render_wrap(const LinearFFTVisualizer* fv, const FFTHistory* h)
 {
     //                    REVERSED HORIZONTALLY v
     const Rectangle src = {0, 0, (float)h->len, -(float)fv->cfg.logical_height};
@@ -250,16 +243,15 @@ int main(int ac, const char** av)
     FFTAnalyzer analyzer = fft_analyzer_new(&fft_config, sample_rx);
 
     // visualizer
-    const SizeType n_freq_bands = fft_config.size / 2;
     const Rectangle spectrogram_panel = {
         .x = 0,
         .y = 0,
         .width = WINDOW_WIDTH,
         .height = WINDOW_HEIGHT,
     };
-    FFTVisualizerConfig vis_cfg = fft_vis_config(
-        n_freq_bands, spectrogram_panel, plasma_rgba, &fft_config);
-    FFTVisualizer visualizer = fft_vis_new(&vis_cfg);
+    LinearFFTVisualizerConfig vis_cfg =
+        lin_fft_vis_config(spectrogram_panel, plasma_rgba, &fft_config);
+    LinearFFTVisualizer visualizer = lin_fft_vis_new(&vis_cfg);
 
     PlayMusicStream(music);
     SetTargetFPS(60);
@@ -276,12 +268,12 @@ int main(int ac, const char** av)
 
         // pull samples from queue and push onto its history
         const SizeType processed = fft_analyzer_update(&analyzer);
-        fft_vis_update(&visualizer, &analyzer.history, processed);
+        lin_fft_vis_update(&visualizer, &analyzer.history, processed);
 
         {
             BeginDrawing();
             ClearBackground(BACKGROUND_COLOR);
-            fft_vis_render_wrap(&visualizer, &analyzer.history);
+            lin_fft_vis_render_wrap(&visualizer, &analyzer.history);
             EndDrawing();
         }
 
@@ -289,7 +281,7 @@ int main(int ac, const char** av)
     }
 
     fft_analyzer_free(&analyzer);
-    fft_vis_destroy(&visualizer);
+    lin_fft_vis_destroy(&visualizer);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
