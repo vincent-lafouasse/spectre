@@ -184,15 +184,50 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         center_frequencies[i] = cfg->freq_ratio * center_frequencies[i - 1];
     }
 
+    const float three_sigma = 3.0f * cfg->sigma;
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
     SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
 
+    SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
         const float f_c = center_frequencies[i];
-        float f_start;
-        float f_end;
+        const float f_low = f_c * powf(2.0f, -three_sigma);
+        const float f_high = f_c * powf(2.0f, three_sigma);
+
+        const int start_bin = (int)(f_low / fft_bw);
+        const SizeType end_bin = (SizeType)(f_high / fft_bw);
+        const SizeType end =
+            (end_bin >= cfg->fft_n_bins) ? cfg->fft_n_bins - 1 : end_bin;
+
+        band_start[i] = (start_bin < 0) ? 0 : (SizeType)start_bin;
+        band_len[i] = end - band_start[i];
+        weight_count += band_len[i];
     }
+
+    float* weights = malloc(sizeof(float) * weight_count);
+    SizeType index = 0;
+    for (SizeType i = 0; i < n_bands; i++) {
+        const float f_c = center_frequencies[i];
+        const SizeType start = band_start[i];
+        const SizeType len = band_len[i];
+
+        for (SizeType j = 0; j < len; j++) {
+            const SizeType fft_bin = start + j;
+            const float f = (float)fft_bin * fft_bw;
+            const float w = frequency_weight(f, f_c, cfg->sigma);
+            weights[index++] = w;
+        }
+    }
+    assert(index == weight_count);
+
+    return (FrequencyBands){
+        .n_bands = n_bands,
+        .band_start = band_start,
+        .band_len = band_len,
+        .weights = weights,
+        .center_frequencies = center_frequencies,
+    };
 }
 
 int main(int ac, const char** av)
