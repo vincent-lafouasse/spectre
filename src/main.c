@@ -103,6 +103,9 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // => f_start^2 = f[n] * f[n-1] = f[n]^2 / r
     // => f_start = sqrt(1/r) f[n]
     //
+    // this is just the geometric mean/midpoint lol, well at least i'm sure of
+    // myself
+    //
     // anw, we want G(f_end) = cutoff
     // where G(f) = exp(-0.5 * d^2 / sigma^2)
     // where d = 1 / 2BPO
