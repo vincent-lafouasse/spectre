@@ -242,6 +242,7 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         .band_start = band_start,
         .band_len = band_len,
         .weights = weights,
+        .weight_offsets = weight_offsets,
         .center_frequencies = center_frequencies,
     };
 }
