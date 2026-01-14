@@ -48,7 +48,8 @@ typedef struct {
 
 #define TODO(T) ((T){0})
 
-LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
+LogSpectrogramConfig log_spectrogram_config(float band_cutoff,
+                                            SizeType bins_per_octave,
                                             Rectangle panel,
                                             const FFTAnalyzer* analyzer)
 {
@@ -81,10 +82,10 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // bandwidth
     //
     // we will select FFT bins based on the value of a gaussian centered on f_c
-    const float cutoff_value = 0.5f;  // -3 dB
-
     // we will find where the band end (f_end) and compute sigma by inverting
     // the gaussian
+    assert(band_cutoff < 1.0f && band_cutoff > 0.0f);
+
     //
     // first, what's the distance to the next band ?
     // dist2(f[n+1], f[n]) = dist2(r * f[n], f[n]) = log2(r) = 1/BPO
@@ -115,9 +116,8 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // ie sigma^2 = d^2 / C
     // sigma = d * C^-1/2
     // sigma = (1 / 2BPO) / sqrt(C)
-    assert(cutoff_value < 1.0f && cutoff_value > 0.0f);
     const float sigma =
-        (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(cutoff_value));
+        (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(band_cutoff));
     assert(sigma > 0.0f);
 
     // A.N. : 12-TET with -3 dB cutoff
