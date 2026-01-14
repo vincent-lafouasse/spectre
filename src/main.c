@@ -176,11 +176,15 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
     const SizeType n_bands = cfg->logical_height;
 
-    SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
-    SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
     float* center_frequencies = malloc(sizeof(float) * n_bands);
+    center_frequencies[0] = cfg->f_min;
+    for (SizeType i = 1; i < n_bands; i++) {
+        center_frequencies[i] = cfg->freq_ratio * center_frequencies[i - 1];
+    }
 
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
+    SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
+    SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
 }
 
 int main(int ac, const char** av)
