@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +72,56 @@ LogSpectrogramConfig log_spectrogram_config(SizeType bins_per_octave,
     // BW[n] = f[n + 1] - f[n] = r * f[n] - f[n] = f[n] (r - 1)
     // => Q = f[n]/BW[n] = 1 / (r - 1)
     const float Q = 1.0f / (freq_ratio - 1.0f);
+
+    // we define the log2 distance dist2(a, b) = max(log2(a / b), log2(b / a))
+    // ie we measure in octaves
+    // since log2(up_the_octave / reference) = log2(2) = 1 (octave)
+    //
+    // let i be a frequency bin, f_c its center frequency, Q its factor, bw its
+    // bandwidth
+    //
+    // we will select FFT bins based on the value of a gaussian centered on f_c
+    const float cutoff_value = 0.5f; // -3 dB
+
+    // we will find where the band end (f_end) and compute sigma by inverting
+    // the gaussian
+    //
+    // first, what's the distance to the next band ?
+    // dist2(f[n+1], f[n]) = dist2(r * f[n], f[n]) = log2(r) = 1/BPO
+    // makes sense, e.g. if 12-TET, the next bin is 1/12 octave away
+    // ie a semitone
+    //
+    // so the band boundary is equidistant from f[n] and f[n+1]
+    // ie log2(f[n+1] / f_end) = log2(f_end, f[n])
+    // ie r * f[n] / f_end = f_end / f[n]
+    // ie f_end^2 = r * f[n]^2
+    // ie f_end = sqrt(r) * f[n]
+    //
+    // with d(end, center) = log2(sqrt(r)) = 1/2 log2(r) = 1/2 * 1/BPO
+    //
+    // resp, dist(f_start, f[n-1]) = dist(f[n], f_start)
+    // => f_start^2 = f[n] * f[n-1] = f[n]^2 / r
+    // => f_start = sqrt(1/r) f[n]
+    //
+    // anw, we want G(f_end) = cutoff
+    // where G(f) = exp(-0.5 * d^2 / sigma^2)
+    // where d = 1 / 2BPO
+    //
+    // so d^2 / sigma^2 = -2 ln(cutoff) := C for cutoff
+    // cutoff < 1 so C > 0
+    // ie sigma^2 = d^2 / C
+    // sigma = d * C^-1/2
+    // sigma = (1 / 2BPO) / sqrt(C)
+    assert(cutoff_value < 1.0f && cutoff_value > 0.0f);
+    const float sigma = (0.5f / (float)bins_per_octave) / sqrtf(-2.0f * logf(cutoff_value));
+    assert(sigma > 0.0f);
+
+    // A.N. : 12-TET with -3 dB cutoff
+    // => BPO = 12 => d = 1/24
+    // cutoff = 0.5 => C = 1.4
+    // => sigma = 0.035
+    // sigma is a constant in this setup because the frequency log-scaling is
+    // taken care of by the log distance
 
     return (LogSpectrogramConfig){
         .screen = panel,
