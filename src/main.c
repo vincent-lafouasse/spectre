@@ -168,7 +168,16 @@ typedef struct {
     float* center_frequencies;  // opt. metadata
 } FrequencyBands;
 
-FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg);
+FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
+{
+    const SizeType n_bands = cfg->logical_height;
+
+    SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
+    SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
+    float* center_frequencies = malloc(sizeof(float) * n_bands);
+
+    const float fft_bw = 0;
+}
 
 int main(int ac, const char** av)
 {
