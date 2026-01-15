@@ -45,8 +45,6 @@ typedef struct {
     const float min_dB;           // cut stuff below -60dB or something
 } LogSpectrogramConfig;
 
-#define TODO(T) ((T){0})
-
 // sharpness multiplies the gaussian sigma
 // so higher sharpness mean narrower bands
 LogSpectrogramConfig log_spectrogram_config(float sharpness,
