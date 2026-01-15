@@ -399,7 +399,27 @@ void log_spectrogram_update(LogSpectrogram* spec,
 }
 
 void log_spectrogram_render_wrap(const LogSpectrogram* spec,
-                                 const FFTHistory* h);
+                                 const FFTHistory* h)
+{
+    //                    REVERSED HORIZONTALLY v
+    const Rectangle src = {0, 0, (float)h->len,
+                           -(float)spec->cfg.logical_height};
+
+    const Rectangle* screen = &spec->cfg.screen;
+    const float screen_draw_width =
+        ((float)h->len / (float)h->cap) * screen->width;
+    const Rectangle dest = {screen->x, screen->y, screen_draw_width,
+                            screen->height};
+
+    DrawTexturePro(spec->texture, src, dest, (Vector2){0, 0}, 0.0f, WHITE);
+
+    if (h->len >= h->cap) {
+        const float cursor_x =
+            screen->x + ((float)h->tail / h->cap) * screen->width;
+        DrawLineV((Vector2){cursor_x, screen->y},
+                  (Vector2){cursor_x, screen->y + screen->height}, RED);
+    }
+}
 
 int main(int ac, const char** av)
 {
@@ -448,8 +468,9 @@ int main(int ac, const char** av)
         .height = WINDOW_HEIGHT,
     };
 
-    const LogSpectrogramConfig log_spectrogram_cfg =
+    const LogSpectrogramConfig spectrogram_cfg =
         log_spectrogram_config(1.0f, 18, spectrogram_panel, &analyzer);
+    /*
     FrequencyBands bands = compute_frequency_bands(&log_spectrogram_cfg);
     {
         const LogSpectrogramConfig* cfg = &log_spectrogram_cfg;
@@ -473,10 +494,9 @@ int main(int ac, const char** av)
         }
         exit(0);
     }
+    */
 
-    LinearSpectrogramConfig spectrogram_cfg =
-        linear_spectrogram_config(spectrogram_panel, plasma_rgba, &fft_config);
-    LinearSpectrogram spectrogram = linear_spectrogram_new(&spectrogram_cfg);
+    LogSpectrogram spectrogram = log_spectrogram_new(&spectrogram_cfg);
 
     PlayMusicStream(music);
     SetTargetFPS(60);
@@ -493,12 +513,12 @@ int main(int ac, const char** av)
 
         // pull samples from queue and push onto its history
         const SizeType processed = fft_analyzer_update(&analyzer);
-        linear_spectrogram_update(&spectrogram, &analyzer.history, processed);
+        log_spectrogram_update(&spectrogram, &analyzer.history, processed);
 
         {
             BeginDrawing();
             ClearBackground(BACKGROUND_COLOR);
-            linear_spectrogram_render_wrap(&spectrogram, &analyzer.history);
+            log_spectrogram_render_wrap(&spectrogram, &analyzer.history);
             EndDrawing();
         }
 
@@ -506,7 +526,7 @@ int main(int ac, const char** av)
     }
 
     fft_analyzer_free(&analyzer);
-    linear_spectrogram_destroy(&spectrogram);
+    log_spectrogram_destroy(&spectrogram);
     deinit_audio_processor();
     UnloadMusicStream(music);
     CloseAudioDevice();
