@@ -327,9 +327,38 @@ void log_spectrogram_destroy(LogSpectrogram* spec)
     free(spec->bands.weights);
 }
 
+static float clamp_unit(float f)
+{
+    return fminf(fmaxf(f, 0.0f), 1.0f);
+}
+
+static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
+{
+    const float clamped = clamp_unit(intensity);
+    const int index = (int)(clamped * (cmap_size - 0.0001f));
+    return *(Color*)cmap[index];
+}
+
+static void log_spectrogram_update_column(LogSpectrogram* spec,
+                                          const Complex* bins,
+                                          SizeType index)
+{
+}
+
 void log_spectrogram_update(LogSpectrogram* spec,
                             const FFTHistory* h,
-                            SizeType n);
+                            SizeType n)
+{
+    n = (n >= h->cap) ? h->cap : n;
+    const SizeType start = (h->tail - n + h->cap) % h->cap;
+
+    for (SizeType i = 0; i < n; i++) {
+        const SizeType index = (start + i) % h->cap;
+        const Complex* bins = fft_history_get_row(h, index);
+        log_spectrogram_update_column(spec, bins, index);
+    }
+}
+
 void log_spectrogram_render_wrap(const LogSpectrogram* spec,
                                  const FFTHistory* h);
 
