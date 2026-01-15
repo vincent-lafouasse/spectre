@@ -188,6 +188,17 @@ typedef struct {
     SizeType cap;
 } TempBand;
 
+float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
+{
+    const float lf_multiplier = 10.0f;  // bigger search range in the bass
+    const float hf_multiplier = 0.5f;   // less resolution in the treble is fine
+    //
+    const float progress = (float)bin / (float)(n_bins - 1);
+    const float multiplier =
+        hf_multiplier * progress + lf_multiplier * (1.0f - progress);
+    return base_sigma * multiplier;
+}
+
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
     const SizeType n_bands = cfg->logical_height;
@@ -205,18 +216,13 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
 
     const float base_sigma = cfg->sigma;
-    const float lf_multiplier = 10.0f;  // bigger search range in the bass
-    const float hf_multiplier = 0.5f;   // less resolution in the treble is fine
 
     SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
         // adaptative sigma
-        const float progress = (float)i / (float)(n_bands - 1);
-        const float multiplier =
-            hf_multiplier * progress + lf_multiplier * (1.0f - progress);
-
+        const float sigma = adaptive_sigma(base_sigma, i, n_bands);
         const float f_c = center_frequencies[i];
-        const float search_range = 3.0f * base_sigma * multiplier;
+        const float search_range = 3.0f * sigma;
         const float f_low = f_c * powf(2.0f, -search_range);
         const float f_high = f_c * powf(2.0f, search_range);
 
