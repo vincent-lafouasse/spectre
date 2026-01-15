@@ -287,6 +287,52 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     };
 }
 
+typedef struct {
+    Texture2D texture;
+    Color* column_buffer;  // [cfg.n_bands] precomputed buffer to move data from
+                           // CPU to GPU
+    float*
+        mag_buffer;  // [cfg.fft_n_bins] store magnitude before recombining them
+    FrequencyBands bands;
+    const LogSpectrogramConfig cfg;
+} LogSpectrogram;
+
+LogSpectrogram log_spectrogram_new(const LogSpectrogramConfig* cfg)
+{
+    FrequencyBands bands = compute_frequency_bands(cfg);
+    float* mag_buffer = malloc(cfg->fft_n_bins * sizeof(float));
+    Color* column_buffer = malloc(bands.n_bands);
+
+    Image img = GenImageColor(cfg->logical_width, cfg->logical_height, BLACK);
+    Texture2D texture = LoadTextureFromImage(img);
+    UnloadImage(img);
+    SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
+
+    return (LogSpectrogram){
+        .texture = texture,
+        .column_buffer = column_buffer,
+        .mag_buffer = mag_buffer,
+        .bands = bands,
+        .cfg = *cfg,
+    };
+}
+
+void log_spectrogram_destroy(LogSpectrogram* spec)
+{
+    free(spec->column_buffer);
+    free(spec->mag_buffer);
+    UnloadTexture(spec->texture);
+    free(spec->bands.bands);
+    free(spec->bands.center_frequencies);
+    free(spec->bands.weights);
+}
+
+void log_spectrogram_update(LogSpectrogram* spec,
+                            const FFTHistory* h,
+                            SizeType n);
+void log_spectrogram_render_wrap(const LogSpectrogram* spec,
+                                 const FFTHistory* h);
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
