@@ -152,28 +152,6 @@ float frequency_weight(float f, float f_c, float sigma)
     return expf(-0.5f * distance * distance / (sigma * sigma));
 }
 
-// partition the FFT bins into (geometric) frequency bands
-// store as a start bin + number of bins in the band
-// + the center frequency for monitoring
-//
-// ok i said partition but they actually overlap for smoothness
-typedef struct {
-    // struct of arrays
-    const SizeType n_bands;
-    // partition the fft bins
-    // note that index 0 is not DC, we ditched the DC bin
-    SizeType* band_start;  // [n_bands]
-    SizeType* band_len;    // [n_bands]
-    float* weights;        // [sum n_bands]
-    // optional metadata
-    // offsets are such that the weights of band `i` is found at
-    // weights[offset + k]
-    //     with offset = weight_offsets[i]
-    //     k in [0, band_len[i][
-    SizeType* weight_offsets;   // [n_bands]
-    float* center_frequencies;  // opt. metadata
-} FrequencyBands;
-
 // no padding and accessed entirely at once
 // fine to make an array of
 typedef struct {
@@ -189,35 +167,12 @@ typedef struct {
 } BandMetadata;
 
 typedef struct {
-    WeightEntry* weights;
-    uint32_t len;
-    uint32_t cap;
-} TempBand;
-
-static TempBand new_band(void)
-{
-    const uint32_t base_cap = 16;
-
-    return (TempBand){
-        .weights = malloc(sizeof(WeightEntry) * base_cap),
-        .len = 0,
-        .cap = base_cap,
-    };
-}
-
-static void add_weight(TempBand* band, WeightEntry weight)
-{
-    if (band->len >= band->cap) {
-        const float new_cap_f = 1.5f * (float)band->cap;
-        const uint32_t new_cap = (uint32_t)ceilf(new_cap_f);
-        WeightEntry* new_buffer = realloc(band->weights, new_cap);
-        band->weights = new_buffer;
-        band->cap = new_cap;
-    }
-
-    band->weights[band->len] = weight;
-    band->len += 1;
-}
+    const SizeType n_bands;
+    BandMetadata* bands;   // [n_bands], indexes the weights
+    WeightEntry* weights;  // [sum bands->len]
+    // optional metadata
+    float* center_frequencies;  // [n_bands]
+} FrequencyBands;
 
 float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
 {
@@ -228,37 +183,6 @@ float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
     const float multiplier =
         hf_multiplier * progress + lf_multiplier * (1.0f - progress);
     return base_sigma * multiplier;
-}
-
-typedef struct {
-    const SizeType n_bands;
-    BandMetadata* bands;   // [n_bands], indexes the weights
-    WeightEntry* weights;  // [sum bands->len]
-    // optional metadata
-    float* center_frequencies;  // [n_bands]
-} FrequencyBandsAlt;
-
-FrequencyBandsAlt alt_compute_frequency_bands(const LogSpectrogramConfig* cfg)
-{
-    const SizeType n_bands = cfg->logical_height;
-
-    float* center_frequencies = malloc(sizeof(float) * n_bands);
-    center_frequencies[0] = cfg->f_min;
-    for (SizeType i = 1; i < n_bands; i++) {
-        center_frequencies[i] = cfg->freq_ratio * center_frequencies[i - 1];
-    }
-
-    TempBand* temp_bands = calloc(n_bands, sizeof(*temp_bands));
-    for (SizeType i = 0; i < n_bands; i++) {
-        temp_bands[i] = new_band();
-    }
-
-    return (FrequencyBandsAlt){
-        .n_bands = n_bands,
-        .bands = NULL,
-        .weights = NULL,
-        .center_frequencies = center_frequencies,
-    };
 }
 
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
@@ -330,12 +254,37 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         }
     }
 
+    // gather
+    BandMetadata* bands = malloc(n_bands * sizeof(*bands));
+    WeightEntry* weight_entries =
+        malloc(weight_count * sizeof(*weight_entries));
+
+    SizeType index = 0;
+    for (SizeType i = 0; i < n_bands; i++) {
+        const BandMetadata band = (BandMetadata){
+            .offset = weight_offsets[i],
+            .len = band_len[i],
+        };
+        bands[i] = band;
+
+        for (SizeType j = 0; j < band.len; j++) {
+            weight_entries[index] = (WeightEntry){
+                .fft_bin = band_start[i] + j,
+                .weight = weights[index],
+            };
+            index += 1;
+        }
+    }
+
+    free(band_start);
+    free(band_len);
+    free(weight_offsets);
+    free(weights);
+
     return (FrequencyBands){
         .n_bands = n_bands,
-        .band_start = band_start,
-        .band_len = band_len,
-        .weights = weights,
-        .weight_offsets = weight_offsets,
+        .bands = bands,
+        .weights = weight_entries,
         .center_frequencies = center_frequencies,
     };
 }
@@ -393,20 +342,18 @@ int main(int ac, const char** av)
     {
         const LogSpectrogramConfig* cfg = &log_spectrogram_cfg;
         const float fft_bw = cfg->sample_rate / cfg->fft_size;
-        for (SizeType i = 0; i < cfg->logical_height; i++) {
-            const float fc = bands.center_frequencies[i];
-            const SizeType fft_start = bands.band_start[i];
-            const SizeType len = bands.band_len[i];
-            const SizeType offset = bands.weight_offsets[i];
 
+        for (SizeType i = 0; i < bands.n_bands; i++) {
+            const float fc = bands.center_frequencies[i];
             printf("Band %u %f {\n", i, fc);
 
-            for (SizeType j = 0; j < len; j++) {
-                const SizeType fft_bin = fft_start + j;
-                const SizeType weight_bin = offset + j;
+            const BandMetadata band = bands.bands[i];
+            for (SizeType j = 0; j < band.len; j++) {
+                const SizeType offset = band.offset + j;
+                const WeightEntry weight = bands.weights[offset];
 
-                const float f = fft_bw * (float)fft_bin;
-                const float w = bands.weights[weight_bin];
+                const float f = fft_bw * (float)weight.fft_bin;
+                const float w = weight.weight;
                 printf("\t%f:\tweight %f\n", f, w);
             }
 
