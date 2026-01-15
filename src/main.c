@@ -230,6 +230,16 @@ float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
     return base_sigma * multiplier;
 }
 
+typedef struct {
+    const SizeType n_bands;
+    BandMetadata* bands;   // [n_bands], indexes the weights
+    WeightEntry* weights;  // [sum bands->len]
+    // optional metadata
+    float* center_frequencies;  // [n_bands]
+} FrequencyBandsAlt;
+
+FrequencyBandsAlt alt_compute_frequency_bands(const LogSpectrogramConfig* cfg);
+
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
     const SizeType n_bands = cfg->logical_height;
