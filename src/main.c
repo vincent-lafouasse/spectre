@@ -319,7 +319,7 @@ int main(int ac, const char** av)
 
             printf("}\n\n");
         }
-        // exit(0);
+        exit(0);
     }
 
     LinearSpectrogramConfig spectrogram_cfg =
