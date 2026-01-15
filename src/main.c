@@ -278,7 +278,7 @@ int main(int ac, const char** av)
     // analyzer
     const FFTConfig fft_config = {
         .size = FFT_SIZE,
-        .stride = FFT_SIZE / 2,
+        .stride = FFT_SIZE / 16,
         .dc_blocker_frequency = 10.0f,  // 10 Hz
         .history_size = HISTORY_SIZE,
         .sample_rate = music.stream.sampleRate,
@@ -293,6 +293,35 @@ int main(int ac, const char** av)
         .width = WINDOW_WIDTH,
         .height = WINDOW_HEIGHT,
     };
+
+    const LogSpectrogramConfig log_spectrogram_cfg =
+        log_spectrogram_config(1.0f, 18, spectrogram_panel, &analyzer);
+    FrequencyBands bands = compute_frequency_bands(&log_spectrogram_cfg);
+    {
+        const LogSpectrogramConfig* cfg = &log_spectrogram_cfg;
+        const float fft_bw = cfg->sample_rate / cfg->fft_size;
+        for (SizeType i = 0; i < cfg->logical_height; i++) {
+            const float fc = bands.center_frequencies[i];
+            const SizeType fft_start = bands.band_start[i];
+            const SizeType len = bands.band_len[i];
+            const SizeType offset = bands.weight_offsets[i];
+
+            printf("Band %u %f {\n", i, fc);
+
+            for (SizeType j = 0; j < len; j++) {
+                const SizeType fft_bin = fft_start + j;
+                const SizeType weight_bin = offset + j;
+
+                const float f = fft_bw * (float)fft_bin;
+                const float w = bands.weights[weight_bin];
+                printf("\t%f:\tweight %f\n", f, w);
+            }
+
+            printf("}\n");
+        }
+        // exit(0);
+    }
+
     LinearSpectrogramConfig spectrogram_cfg =
         linear_spectrogram_config(spectrogram_panel, plasma_rgba, &fft_config);
     LinearSpectrogram spectrogram = linear_spectrogram_new(&spectrogram_cfg);
