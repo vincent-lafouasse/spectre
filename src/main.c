@@ -244,11 +244,12 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         const SizeType fft_start = band_start[i];
         const SizeType len = band_len[i];
         const SizeType weight_offset = weight_offsets[i];
+        const float sigma = adaptive_sigma(base_sigma, i, n_bands);
 
         for (SizeType j = 0; j < len; j++) {
             const SizeType fft_bin = fft_start + j;
             const float f = (float)fft_bin * fft_bw;
-            const float w = frequency_weight(f, f_c, cfg->sigma);
+            const float w = frequency_weight(f, f_c, sigma);
             weights[weight_offset + j] = w;
         }
     }
