@@ -238,7 +238,28 @@ typedef struct {
     float* center_frequencies;  // [n_bands]
 } FrequencyBandsAlt;
 
-FrequencyBandsAlt alt_compute_frequency_bands(const LogSpectrogramConfig* cfg);
+FrequencyBandsAlt alt_compute_frequency_bands(const LogSpectrogramConfig* cfg)
+{
+    const SizeType n_bands = cfg->logical_height;
+
+    float* center_frequencies = malloc(sizeof(float) * n_bands);
+    center_frequencies[0] = cfg->f_min;
+    for (SizeType i = 1; i < n_bands; i++) {
+        center_frequencies[i] = cfg->freq_ratio * center_frequencies[i - 1];
+    }
+
+    TempBand* temp_bands = calloc(n_bands, sizeof(*temp_bands));
+    for (SizeType i = 0; i < n_bands; i++) {
+        temp_bands[i] = new_band();
+    }
+
+    return (FrequencyBandsAlt){
+        .n_bands = n_bands,
+        .bands = NULL,
+        .weights = NULL,
+        .center_frequencies = center_frequencies,
+    };
+}
 
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
