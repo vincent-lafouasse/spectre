@@ -188,7 +188,6 @@ typedef struct {
     SizeType cap;
 } TempBand;
 
-
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
     const SizeType n_bands = cfg->logical_height;
