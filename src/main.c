@@ -185,6 +185,7 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     }
 
     const float sigma = cfg->sigma;
+    const float search_range = 3.0f * sigma;
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
     SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
@@ -193,8 +194,8 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
         const float f_c = center_frequencies[i];
-        const float f_low = f_c * powf(2.0f, -3.0f * sigma);
-        const float f_high = f_c * powf(2.0f, 3.0f * sigma);
+        const float f_low = f_c * powf(2.0f, -search_range);
+        const float f_high = f_c * powf(2.0f, search_range);
 
         const int start_bin = (int)floorf(f_low / fft_bw);
         const SizeType end_bin = (SizeType)ceilf(f_high / fft_bw);
