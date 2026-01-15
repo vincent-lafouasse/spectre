@@ -231,7 +231,7 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         const SizeType end =
             (end_bin >= cfg->fft_n_bins) ? cfg->fft_n_bins - 1 : end_bin;
 
-        band_start[i] = (start_bin < 0) ? 0 : (SizeType)start_bin;
+        band_start[i] = (start_bin < 1) ? 1 : (SizeType)start_bin;
         band_len[i] = end + 1 - band_start[i];  // include end bin
         weight_offsets[i] = weight_count;
 
