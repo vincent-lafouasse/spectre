@@ -184,16 +184,25 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         center_frequencies[i] = cfg->freq_ratio * center_frequencies[i - 1];
     }
 
-    const float sigma = cfg->sigma;
-    const float search_range = 3.0f * sigma;
-    const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
     SizeType* band_start = malloc(sizeof(SizeType) * n_bands);
     SizeType* band_len = malloc(sizeof(SizeType) * n_bands);
     SizeType* weight_offsets = malloc(sizeof(SizeType) * n_bands);
 
+    const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
+
+    const float base_sigma = cfg->sigma;
+    const float lf_multiplier = 3.5f;  // bigger search range in the bass
+    const float hf_multiplier = 0.7f;  // less resolution in the treble is fine
+
     SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
+        // adaptative sigma
+        const float progress = (float)i / (float)(n_bands - 1);
+        const float multiplier =
+            hf_multiplier * progress + lf_multiplier * (1.0f - progress);
+
         const float f_c = center_frequencies[i];
+        const float search_range = 3.0f * base_sigma * multiplier;
         const float f_low = f_c * powf(2.0f, -search_range);
         const float f_high = f_c * powf(2.0f, search_range);
 
