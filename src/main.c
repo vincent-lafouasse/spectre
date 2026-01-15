@@ -174,6 +174,21 @@ typedef struct {
     float* center_frequencies;  // opt. metadata
 } FrequencyBands;
 
+// some temporary data structures that will be collapsed into the permanent
+// `FrequencyBands`
+typedef struct {
+    SizeType fft_bin;
+    float frequency;
+    float weight;
+} WeightEntry;
+
+typedef struct {
+    WeightEntry* weights;
+    SizeType len;
+    SizeType cap;
+} TempBand;
+
+
 FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
 {
     const SizeType n_bands = cfg->logical_height;
