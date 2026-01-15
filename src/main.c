@@ -174,18 +174,24 @@ typedef struct {
     float* center_frequencies;  // opt. metadata
 } FrequencyBands;
 
-// some temporary data structures that will be collapsed into the permanent
-// `FrequencyBands`
+// no padding and accessed entirely at once
+// fine to make an array of
 typedef struct {
-    SizeType fft_bin;
-    float frequency;
+    uint32_t fft_bin;
     float weight;
 } WeightEntry;
 
+// same
+// indexes the weights
+typedef struct {
+    uint32_t offset;
+    uint32_t len;
+} BandMetadata;
+
 typedef struct {
     WeightEntry* weights;
-    SizeType len;
-    SizeType cap;
+    uint32_t len;
+    uint32_t cap;
 } TempBand;
 
 float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
