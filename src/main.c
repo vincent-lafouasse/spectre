@@ -291,8 +291,8 @@ typedef struct {
     Texture2D texture;
     Color* column_buffer;  // [cfg.n_bands] precomputed buffer to move data from
                            // CPU to GPU
-    float*
-        mag_buffer;  // [cfg.fft_n_bins] store magnitude before recombining them
+    float* power_buffer;  // [cfg.fft_n_bins] store magnitude before recombining
+                          // them
     FrequencyBands bands;
     const LogSpectrogramConfig cfg;
 } LogSpectrogram;
@@ -300,8 +300,8 @@ typedef struct {
 LogSpectrogram log_spectrogram_new(const LogSpectrogramConfig* cfg)
 {
     FrequencyBands bands = compute_frequency_bands(cfg);
-    float* mag_buffer = malloc(cfg->fft_n_bins * sizeof(float));
-    Color* column_buffer = malloc(bands.n_bands);
+    float* power_buffer = malloc(cfg->fft_n_bins * sizeof(float));
+    Color* column_buffer = malloc(bands.n_bands * sizeof(Color));
 
     Image img = GenImageColor(cfg->logical_width, cfg->logical_height, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
@@ -311,7 +311,7 @@ LogSpectrogram log_spectrogram_new(const LogSpectrogramConfig* cfg)
     return (LogSpectrogram){
         .texture = texture,
         .column_buffer = column_buffer,
-        .mag_buffer = mag_buffer,
+        .power_buffer = power_buffer,
         .bands = bands,
         .cfg = *cfg,
     };
@@ -320,7 +320,7 @@ LogSpectrogram log_spectrogram_new(const LogSpectrogramConfig* cfg)
 void log_spectrogram_destroy(LogSpectrogram* spec)
 {
     free(spec->column_buffer);
-    free(spec->mag_buffer);
+    free(spec->power_buffer);
     UnloadTexture(spec->texture);
     free(spec->bands.bands);
     free(spec->bands.center_frequencies);
@@ -343,6 +343,45 @@ static void log_spectrogram_update_column(LogSpectrogram* spec,
                                           const Complex* bins,
                                           SizeType index)
 {
+    const LogSpectrogramConfig* cfg = &spec->cfg;
+
+    // precompute the bin power
+    for (SizeType i = 0; i < cfg->fft_n_bins; i++) {
+        const float re = crealf(bins[i]);
+        const float im = cimagf(bins[i]);
+
+        const float power = re * re + im * im;
+        spec->power_buffer[i] = power;
+    }
+
+    const WeightEntry* weights = spec->bands.weights;
+
+    // combine and write to column buffer
+    for (SizeType i = 0; i < cfg->logical_height; i++) {
+        const BandMetadata* band = spec->bands.bands + i;
+        const SizeType offset = band->offset;
+        const SizeType len = band->len;
+
+        float total_power = 0.0f;
+        for (SizeType j = 0; j < len; j++) {
+            const WeightEntry entry = weights[offset + j];
+            const SizeType fft_bin = entry.fft_bin;
+            total_power += entry.weight * spec->power_buffer[fft_bin - 1];
+        }
+
+        const float db =
+            10.0f * log10f((total_power / cfg->power_reference) + 1e-9f);
+        const float intensity = (db - cfg->min_dB) / (-cfg->min_dB);
+
+        spec->column_buffer[i] =
+            float_to_color(intensity, cfg->cmap, COLORMAP_SIZE);
+    }
+
+    // write to texture
+    UpdateTextureRec(
+        spec->texture,
+        (Rectangle){(float)index, 0, 1, (float)spec->cfg.logical_height},
+        spec->column_buffer);
 }
 
 void log_spectrogram_update(LogSpectrogram* spec,
