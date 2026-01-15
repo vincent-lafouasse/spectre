@@ -191,8 +191,8 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
     const float fft_bw = cfg->sample_rate / (float)cfg->fft_size;
 
     const float base_sigma = cfg->sigma;
-    const float lf_multiplier = 3.5f;  // bigger search range in the bass
-    const float hf_multiplier = 0.7f;  // less resolution in the treble is fine
+    const float lf_multiplier = 10.0f;  // bigger search range in the bass
+    const float hf_multiplier = 0.5f;  // less resolution in the treble is fine
 
     SizeType weight_count = 0;
     for (SizeType i = 0; i < n_bands; i++) {
