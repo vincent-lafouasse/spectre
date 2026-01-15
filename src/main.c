@@ -194,6 +194,31 @@ typedef struct {
     uint32_t cap;
 } TempBand;
 
+static TempBand new_band(void)
+{
+    const uint32_t base_cap = 16;
+
+    return (TempBand){
+        .weights = malloc(sizeof(WeightEntry) * base_cap),
+        .len = 0,
+        .cap = base_cap,
+    };
+}
+
+static void add_weight(TempBand* band, WeightEntry weight)
+{
+    if (band->len >= band->cap) {
+        const float new_cap_f = 1.5f * (float)band->cap;
+        const uint32_t new_cap = (uint32_t)ceilf(new_cap_f);
+        WeightEntry* new_buffer = realloc(band->weights, new_cap);
+        band->weights = new_buffer;
+        band->cap = new_cap;
+    }
+
+    band->weights[band->len] = weight;
+    band->len += 1;
+}
+
 float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
 {
     const float lf_multiplier = 10.0f;  // bigger search range in the bass
