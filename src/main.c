@@ -192,7 +192,7 @@ float adaptive_sigma(float base_sigma, SizeType bin, SizeType n_bins)
 {
     const float lf_multiplier = 10.0f;  // bigger search range in the bass
     const float hf_multiplier = 0.5f;   // less resolution in the treble is fine
-    //
+
     const float progress = (float)bin / (float)(n_bins - 1);
     const float multiplier =
         hf_multiplier * progress + lf_multiplier * (1.0f - progress);
