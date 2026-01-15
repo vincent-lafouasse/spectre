@@ -54,8 +54,8 @@ LogSpectrogramConfig log_spectrogram_config(float sharpness,
                                             Rectangle panel,
                                             const FFTAnalyzer* analyzer)
 {
-    const float f_min = 20.0f;
-    const float f_max = 20000.0f;
+    const float f_min = 35.0f;
+    const float f_max = 18000.0f;
 
     const SizeType fft_size = analyzer->cfg.size;
 
@@ -196,13 +196,13 @@ FrequencyBands compute_frequency_bands(const LogSpectrogramConfig* cfg)
         const float f_low = f_c * powf(2.0f, -three_sigma);
         const float f_high = f_c * powf(2.0f, three_sigma);
 
-        const int start_bin = (int)(f_low / fft_bw);
-        const SizeType end_bin = (SizeType)(f_high / fft_bw);
+        const int start_bin = (int)floorf(f_low / fft_bw);
+        const SizeType end_bin = (SizeType)ceilf(f_high / fft_bw);
         const SizeType end =
             (end_bin >= cfg->fft_n_bins) ? cfg->fft_n_bins - 1 : end_bin;
 
         band_start[i] = (start_bin < 0) ? 0 : (SizeType)start_bin;
-        band_len[i] = end - band_start[i];
+        band_len[i] = end + 1 - band_start[i]; // include end bin
         weight_offsets[i] = weight_count;
 
         weight_count += band_len[i];
@@ -278,7 +278,7 @@ int main(int ac, const char** av)
     // analyzer
     const FFTConfig fft_config = {
         .size = FFT_SIZE,
-        .stride = FFT_SIZE / 16,
+        .stride = FFT_SIZE / 2,
         .dc_blocker_frequency = 10.0f,  // 10 Hz
         .history_size = HISTORY_SIZE,
         .sample_rate = music.stream.sampleRate,
@@ -317,7 +317,7 @@ int main(int ac, const char** av)
                 printf("\t%f:\tweight %f\n", f, w);
             }
 
-            printf("}\n");
+            printf("}\n\n");
         }
         // exit(0);
     }
