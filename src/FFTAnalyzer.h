@@ -1,8 +1,6 @@
 #pragma once
 
-#include <complex.h>
-
-#include <fftw3.h>
+#include "kiss_fftr.h"
 
 #include "core/History.h"
 #include "core/LockFreeQueue.h"
@@ -20,9 +18,9 @@ typedef struct {
 typedef struct {
     FFTConfig cfg;
 
-    fftwf_plan plan;
+    kiss_fftr_cfg plan;
     float* input;
-    Complex* output;
+    kiss_fft_cpx* output;
     const SizeType n_bins;
 
     LockFreeQueueConsumer rx;
@@ -33,5 +31,5 @@ typedef struct {
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx);
 void fft_analyzer_free(FFTAnalyzer* analyzer);
 
-// returns number of elements pushed onto its history
+// returns number of frames pushed onto the history
 SizeType fft_analyzer_update(FFTAnalyzer* analyzer);
