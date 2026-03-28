@@ -83,8 +83,6 @@ int main(int ac, const char** av)
             linear_spectrogram_render_wrap(&spectrogram, &analyzer.history);
             EndDrawing();
         }
-
-        frame_counter++;
     }
 
     fft_analyzer_free(&analyzer);
