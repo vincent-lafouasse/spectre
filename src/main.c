@@ -11,6 +11,8 @@
 #include "core/LockFreeQueue.h"
 #include "definitions.h"
 
+#define WINDOW_NAME "spectre"
+
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
@@ -22,7 +24,7 @@ int main(int ac, const char** av)
     }
     const char* music_path = av[1];
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "title");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
     InitAudioDevice();
 
     LockFreeQueue* sample_queue = malloc(sizeof(*sample_queue));
