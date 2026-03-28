@@ -1,16 +1,15 @@
 #include "FFTAnalyzer.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
 {
-    float* input = fftwf_alloc_real(cfg->size);
-    memset(input, 0, sizeof(*input) * cfg->size);
-    Complex* output = fftwf_alloc_complex(1 + (cfg->size / 2));
-    fftwf_plan plan = fftwf_plan_dft_r2c_1d(cfg->size, input, output,
-                                            FFTW_MEASURE | FFTW_PRESERVE_INPUT);
+    float* input = calloc(cfg->size, sizeof(float));
+    kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
+    kiss_fftr_cfg plan = kiss_fftr_alloc(cfg->size, 0, NULL, NULL);
 
-    const SizeType n_bins = cfg->size / 2;  // ditch the DC information
+    const SizeType n_bins = cfg->size / 2;  // ditch DC
     FFTHistory history = fft_history_new(cfg->history_size, n_bins);
 
     OnePoleFilter dc_blocker =
@@ -34,13 +33,13 @@ void fft_analyzer_free(FFTAnalyzer* analyzer)
         return;
     }
 
-    fftwf_destroy_plan(analyzer->plan);
-    fftwf_free(analyzer->input);
-    fftwf_free(analyzer->output);
+    kiss_fftr_free(analyzer->plan);
+    free(analyzer->input);
+    free(analyzer->output);
     fft_history_free(&analyzer->history);
 }
 
-// returns number of elements pushed onto its history
+// returns number of frames pushed onto the history
 SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
 {
     const SizeType to_keep = analyzer->cfg.size - analyzer->cfg.stride;
@@ -48,20 +47,19 @@ SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
 
     SizeType n = 0;
     while (clfq_pop(&analyzer->rx, analyzer->input + to_keep, to_read)) {
-        // no window, i want to see what happens when there's no windowing
+        // TODO: add a window
 
-        // HPF the slice we just pulled
+        // HPF the incoming slice
         filter_hpf_process(&analyzer->dc_blocker, analyzer->input + to_keep,
                            to_read);
 
-        // fft
-        fftwf_execute(analyzer->plan);
+        kiss_fftr(analyzer->plan, analyzer->input, analyzer->output);
 
         // ditch DC bin
-        fft_history_push(&analyzer->history, analyzer->output + 1);
+        fft_history_push(&analyzer->history, (Complex*)(analyzer->output + 1));
 
-        // ditch the first to_read samples
-        memmove(analyzer->input, analyzer->input + to_read, to_keep);
+        memmove(analyzer->input, analyzer->input + to_read,
+                to_keep * sizeof(float));
         ++n;
     }
 
