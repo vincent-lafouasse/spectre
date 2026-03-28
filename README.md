@@ -6,4 +6,4 @@ creeper? aw man
 
 huge thanks to kiss-fft for being simple to build and simple to use
 
-huge thanks to nothings for releasing an ogg codec to the public domain
+huge thanks to raylib for being so pleasant to use
