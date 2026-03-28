@@ -8,7 +8,7 @@
 
 #define MONO_BUFFER_SIZE 1024
 
-float mono_buffer[MONO_BUFFER_SIZE];
+static float mono_buffer[MONO_BUFFER_SIZE];
 
 static _Atomic(LockFreeQueueProducer*) s_sample_tx = NULL;
 
