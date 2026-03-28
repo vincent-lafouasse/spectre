@@ -65,31 +65,19 @@ $(RAYLIB_LIB):
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJS)
-	@echo "\033[31mRemoved object files\033[0m"
+	$(RM) $(BUILD_DIR) $(NAME)
 
-.PHONY: fclean
-fclean: clean
-	$(RM) $(NAME) $(BUILD_DIR)
-	make clean -C $(RAYLIB_DIR)
-	$(RM) $(RAYLIB_LIB)
-	@echo "\033[31mRemoved $(NAME)\033[0m"
-
-# Clean everything including the FFTW build artifacts
 .PHONY: distclean
-distclean: fclean
-	if [ -d "$(FFTW_DIR)" ]; then \
-		$(MAKE) -C $(FFTW_DIR) distclean || true; \
-	fi
+distclean: clean
+	$(MAKE) -C $(RAYLIB_DIR) clean
+	$(MAKE) -C $(KISS_FFT_DIR) clean
 	$(RM) $(FFTW_INST)
-	@echo "\033[31mDeep cleaned FFTW vendor folder\033[0m"
+
+.PHONY: re
+re: clean all
 
 .PHONY: update
-update: fclean
-	mkdir -p build
-	echo "\033[33mGenerating compilation database with bear...\033[0m"
-	bear --output build/compile_commands.json -- $(MAKE) all
-	echo "\033[32mUpdate complete: build/compile_commands.json generated.\033[0m"
-
-re: clean all
+update: clean
+	$(MAKE) all
+	bear --output $(BUILD_DIR)/compile_commands.json -- $(MAKE) re
 
