@@ -31,7 +31,10 @@ SRCS        = $(shell find src -name '*.c')
 OBJS        = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 .PHONY: all
-all: $(NAME)
+all: build
+
+.PHONY: build
+build: $(NAME)
 
 $(NAME): $(RAYLIB_LIB) $(FFTW_LIB) $(KISS_FFT_LIB) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
@@ -81,3 +84,10 @@ update: clean
 	$(MAKE) all
 	bear --output $(BUILD_DIR)/compile_commands.json -- $(MAKE) re
 
+
+# couple of aliases
+.PHONY: b c dc u
+b: build
+c: clean
+dc: distclean
+u: update
