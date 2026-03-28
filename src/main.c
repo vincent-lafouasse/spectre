@@ -16,11 +16,6 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
-#define ALERT_FRACTION 16
-// if ALERT_FRACTION is 10, alert at 90% fullness
-#define ALMOSTFULL_ALERT \
-    ((ALERT_FRACTION - 1) * CLF_QUEUE_SIZE / ALERT_FRACTION)
-
 int main(int ac, const char** av)
 {
     if (ac != 2) {
@@ -75,15 +70,8 @@ int main(int ac, const char** av)
     PlayMusicStream(music);
     SetTargetFPS(60);
 
-    SizeType frame_counter = 0;
     while (!WindowShouldClose()) {
         UpdateMusicStream(music);
-
-        const SizeType available = clfq_consumer_size_eager(&sample_rx);
-        if (available > ALMOSTFULL_ALERT) {
-            printf("frame %u buffer almost full: %u\n", frame_counter,
-                   available);
-        }
 
         // pull samples from queue and push onto its history
         const SizeType processed = fft_analyzer_update(&analyzer);
