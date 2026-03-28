@@ -468,22 +468,25 @@ int main(int ac, const char** av)
         .height = WINDOW_HEIGHT,
     };
 
+    const float sharpness = 1.0f;
+    const SizeType bpo = 18;
     const LogSpectrogramConfig spectrogram_cfg =
-        log_spectrogram_config(1.0f, 18, spectrogram_panel, &analyzer);
-    /*
-    FrequencyBands bands = compute_frequency_bands(&log_spectrogram_cfg);
+        log_spectrogram_config(sharpness, bpo, spectrogram_panel, &analyzer);
+
+    LogSpectrogram spectrogram = log_spectrogram_new(&spectrogram_cfg);
+    const FrequencyBands* bands = &spectrogram.bands;
     {
-        const LogSpectrogramConfig* cfg = &log_spectrogram_cfg;
+        const LogSpectrogramConfig* cfg = &spectrogram.cfg;
         const float fft_bw = cfg->sample_rate / cfg->fft_size;
 
-        for (SizeType i = 0; i < bands.n_bands; i++) {
-            const float fc = bands.center_frequencies[i];
+        for (SizeType i = 0; i < bands->n_bands; i++) {
+            const float fc = bands->center_frequencies[i];
             printf("Band %u %f {\n", i, fc);
 
-            const BandMetadata band = bands.bands[i];
+            const BandMetadata band = bands->bands[i];
             for (SizeType j = 0; j < band.len; j++) {
                 const SizeType offset = band.offset + j;
-                const WeightEntry weight = bands.weights[offset];
+                const WeightEntry weight = bands->weights[offset];
 
                 const float f = fft_bw * (float)weight.fft_bin;
                 const float w = weight.weight;
@@ -492,11 +495,7 @@ int main(int ac, const char** av)
 
             printf("}\n\n");
         }
-        exit(0);
     }
-    */
-
-    LogSpectrogram spectrogram = log_spectrogram_new(&spectrogram_cfg);
 
     PlayMusicStream(music);
     SetTargetFPS(60);
