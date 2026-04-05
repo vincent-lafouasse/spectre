@@ -19,3 +19,5 @@ C. Schörkhuber, and A. Klapuri, "Constant-Q transform toolbox for music process
 N. Holighaus, M. Doerfler, G. A. Velasco, and T. Grill, "A framework for invertible, real-time constant-Q transforms", *IEEE Transactions on Audio, Speech and Language Processing*, vol. 21, no. 4, pp. 775--785, Sep. 2012, doi: [10.1109/TASL.2012.2234114](https://doi.org/10.1109/TASL.2012.2234114), [Archive](https://www.researchgate.net/publication/231513093_A_Framework_for_Invertible_Real-Time_Constant-Q_Transforms).
 
 P. Cancela, M. Rocamora, and E. López, "An efficient multi-resolution spectral transform for music analysis", in *10th International Society for Music Information Retrieval Conference*, 2009, pp. 309--314, doi: [10.5281/zenodo.1416788](https://doi.org/10.5281/zenodo.1416788), [Archive](https://archives.ismir.net/ismir2009/paper/000070.pdf).
+
+also, see [here](https://github.com/vincent-lafouasse/LockFreeQueue) the references for my lock-free queue in my review on the subject
