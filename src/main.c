@@ -44,7 +44,18 @@ int main(int ac, const char** av)
     }
     const char* music_path = av[1];
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
+    const AppConfig app_cfg = {
+        .window_name = WINDOW_NAME,
+        .window_width = WINDOW_WIDTH,
+        .window_height = WINDOW_HEIGHT,
+        .target_fps = 60,
+        // 100 px/s ≈ 16 s of audio on a 1600px-wide window at the default
+        // FFT config (stride=1024, sr=44100)
+        .scroll_speed_px_per_sec = 100.0f,
+    };
+
+    InitWindow(app_cfg.window_width, app_cfg.window_height,
+               app_cfg.window_name);
     InitAudioDevice();
 
     LockFreeQueue* sample_queue = malloc(sizeof(*sample_queue));
