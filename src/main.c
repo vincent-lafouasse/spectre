@@ -30,6 +30,11 @@ float cfg_dt_ms(AppConfig cfg)
     return 1000.0f / (float)cfg.target_fps;
 }
 
+float cfg_scroll_speed_px_per_frame(AppConfig cfg)
+{
+    return cfg.scroll_speed_px_per_sec / (float)cfg.target_fps;
+}
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
