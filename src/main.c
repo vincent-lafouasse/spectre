@@ -25,9 +25,10 @@ struct AppConfig {
     float scroll_speed_px_per_sec;
 };
 
-float cfg_dt_ms(AppConfig cfg)
+// implied SI, ie in seconds
+float cfg_dt(AppConfig cfg)
 {
-    return 1000.0f / (float)cfg.target_fps;
+    return 1.0f / (float)cfg.target_fps;
 }
 
 float cfg_scroll_speed_px_per_frame(AppConfig cfg)
