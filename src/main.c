@@ -12,7 +12,6 @@
 #include "definitions.h"
 
 #define WINDOW_NAME "spectre"
-
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
