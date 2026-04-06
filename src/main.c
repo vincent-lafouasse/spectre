@@ -22,7 +22,7 @@ struct AppConfig {
     int window_height;
     int window_width;
     int target_fps;
-    float scroll_speed_px_per_frame;
+    float scroll_speed_px_per_sec;
 };
 
 float cfg_dt_ms(AppConfig cfg)
