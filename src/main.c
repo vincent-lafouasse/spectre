@@ -18,6 +18,7 @@
 
 typedef struct AppConfig AppConfig;
 struct AppConfig {
+    const char* const window_name;
     int window_height;
     int window_width;
     int target_fps;
