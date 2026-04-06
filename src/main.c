@@ -21,6 +21,7 @@ struct AppConfig {
     int window_height;
     int window_width;
     int target_fps;
+    // decoupled from i) frame rate and ii) FFT size/stride
     float scroll_speed_px_per_sec;
 };
 
