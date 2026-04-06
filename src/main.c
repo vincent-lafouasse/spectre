@@ -16,6 +16,19 @@
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
+typedef struct AppConfig AppConfig;
+struct AppConfig {
+    int window_height;
+    int window_width;
+    int target_fps;
+    float scroll_speed_px_per_frame;
+};
+
+float cfg_dt_ms(AppConfig cfg)
+{
+    return 1000.0f / (float)cfg.target_fps;
+}
+
 int main(int ac, const char** av)
 {
     if (ac != 2) {
