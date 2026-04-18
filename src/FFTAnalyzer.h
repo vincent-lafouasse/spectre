@@ -1,9 +1,9 @@
 #pragma once
 
+#include "LockFreeQueue.h"
 #include "kiss_fftr.h"
 
 #include "core/History.h"
-#include "core/LockFreeQueue.h"
 #include "definitions.h"
 #include "dsp/filters.h"
 

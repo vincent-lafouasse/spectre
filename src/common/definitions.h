@@ -11,8 +11,6 @@
 
 #define FFT_SIZE 2048
 
-#define CLF_QUEUE_SIZE (8 * FFT_SIZE)
-
 #define HISTORY_SIZE 1024
 
 // one or two slices

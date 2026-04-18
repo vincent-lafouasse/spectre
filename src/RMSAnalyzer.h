@@ -1,7 +1,8 @@
 #pragma once
 
+#include "LockFreeQueue.h"
+
 #include "core/History.h"
-#include "core/LockFreeQueue.h"
 
 #define RMS_SIZE 1024
 #define RMS_STRIDE (RMS_SIZE / 2)

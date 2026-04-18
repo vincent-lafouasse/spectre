@@ -3,12 +3,12 @@
 #include <string.h>
 
 #include <raylib.h>
+#include "LockFreeQueue.h"
 
 #include "FFTAnalyzer.h"
 #include "LinearSpectrogram.h"
 #include "audio_callback.h"
 #include "colormap/palette.h"
-#include "core/LockFreeQueue.h"
 #include "definitions.h"
 
 #define WINDOW_NAME "spectre"

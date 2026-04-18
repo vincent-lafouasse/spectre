@@ -22,11 +22,25 @@ LFQ_QUEUE_SIZE = 4096
 LFQ_BUILD      = $(LFQ_DIR)/build
 LFQ_LIB        = $(LFQ_BUILD)/libLockFreeQueue.a
 
-INCS        = -I$(SRCS_DIR) -I$(SRCS_DIR)/common -I$(RAYLIB_DIR) -I$(KISS_FFT_DIR)
-LIBS        = $(RAYLIB_LIB) $(KISS_FFT_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
+INCS = -I$(SRCS_DIR) -I$(SRCS_DIR)/common \
+       -I$(RAYLIB_DIR)                    \
+       -I$(KISS_FFT_DIR)                  \
+       -I $(LFQ_DIR)
 
-SRCS        = $(shell find src -name '*.c')
-OBJS        = $(SRCS:%.c=$(BUILD_DIR)/%.o)
+CPPFLAGS = $(INCS) -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE)
+
+LIBS = $(RAYLIB_LIB)        \
+       $(KISS_FFT_LIB)      \
+       $(LFQ_LIB)           \
+       -framework CoreVideo \
+       -framework IOKit     \
+       -framework Cocoa     \
+       -framework GLUT      \
+       -framework OpenGL    \
+       -lm
+
+SRCS = $(shell find src -name '*.c')
+OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 .PHONY: all
 all: $(NAME)
@@ -37,7 +51,7 @@ $(NAME): $(RAYLIB_LIB) $(KISS_FFT_LIB) $(LFQ_LIB) $(OBJS)
 
 $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 	@echo "\033[34mCompiled $<\033[0m"
 
 $(BUILD_DIR):
