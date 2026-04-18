@@ -31,6 +31,7 @@ float cfg_dt(AppConfig cfg)
     return 1.0f / (float)cfg.target_fps;
 }
 
+// how many pixels must advance from frame to frame
 float cfg_scroll_speed_px_per_frame(AppConfig cfg)
 {
     return cfg.scroll_speed_px_per_sec / (float)cfg.target_fps;
