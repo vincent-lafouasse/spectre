@@ -1,0 +1,3 @@
+[submodule "modules/LockFreeQueue"]
+	path = modules/LockFreeQueue
+	url = git@github.com:vincent-lafouasse/LockFreeQueue.git
