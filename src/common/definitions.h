@@ -13,7 +13,9 @@
 
 #define HISTORY_SIZE 1024
 
+#if !defined(PI)
 #define PI 3.14159265358979323846264338327950f
+#endif
 
 // one or two slices
 typedef struct {
