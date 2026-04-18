@@ -99,7 +99,7 @@ int main(int ac, const char** av)
     LinearSpectrogram spectrogram = linear_spectrogram_new(&spectrogram_cfg);
 
     PlayMusicStream(music);
-    SetTargetFPS(60);
+    SetTargetFPS(app_cfg.target_fps);
 
     while (!WindowShouldClose()) {
         UpdateMusicStream(music);
