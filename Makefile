@@ -21,8 +21,7 @@ DEV         = -O1 -g3                                      \
               -fno-omit-frame-pointer                      \
               -fsanitize=address,undefined                 \
               -fno-sanitize-recover=all                    \
-              -fstack-protector-strong                     \
-              -D_FORTIFY_SOURCE=2
+              -fstack-protector-strong
 CFLAGS      = -std=$(C_VERSION) $(WARN) $(DEV)
 
 SRCS_DIR    = src
