@@ -47,7 +47,8 @@ SizeType rms_analyzer_update(RMSAnalyzer* analyzer)
         const float rms_value = compute_rms(analyzer->buffer, analyzer->size);
         fhistory_push(&analyzer->history, rms_value);
         // ditch the first to_read samples
-        memmove(analyzer->buffer, analyzer->buffer + to_read, to_keep);
+        memmove(analyzer->buffer, analyzer->buffer + to_read,
+                to_keep * sizeof(float));
         ++n;
     }
 
