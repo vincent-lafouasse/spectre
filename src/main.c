@@ -26,7 +26,7 @@ struct AppConfig {
 };
 
 // implied SI, ie in seconds
-float cfg_dt(AppConfig cfg)
+float cfg_frame_dt(AppConfig cfg)
 {
     return 1.0f / (float)cfg.target_fps;
 }
