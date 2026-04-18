@@ -1,8 +1,23 @@
 NAME        = spectre
+
 CC          = gcc
-C_VERSION   = c11
-CFLAGS      = -Wall -Wextra -std=$(C_VERSION) -O3
 RM          = rm -rf
+
+C_VERSION   = c11
+WARN        = -Wall -Wextra -Wpedantic                     \
+              -Wshadow -Wcast-align -Wcast-qual            \
+              -Wnull-dereference                           \
+              -Wdouble-promotion                           \
+              -Wconversion -Wsign-conversion               \
+              -Wstrict-prototypes -Wold-style-definition   \
+              -Wmissing-prototypes -Wmissing-declarations  \
+              -Wwrite-strings -Wredundant-decls            \
+              -Wformat=2 -Wvla                             \
+              -Werror=implicit-function-declaration        \
+              -Werror=implicit-int                         \
+              -Werror=return-type                          \
+              -Werror=incompatible-pointer-types
+CFLAGS      = $(WARN) -std=$(C_VERSION) -O3 -g
 
 SRCS_DIR    = src
 BUILD_DIR   = build
