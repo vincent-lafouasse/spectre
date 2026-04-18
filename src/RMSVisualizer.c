@@ -13,7 +13,7 @@ static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
 {
     const float clamped = clamp_unit(intensity);
     const int index = (int)(clamped * (cmap_size - 0.0001f));
-    return *(Color*)cmap[index];
+    return *(const Color*)cmap[index];
 }
 
 RMSVisualizer rms_vis_new(SizeType size, float w, float h, Vector2 origin)
