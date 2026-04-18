@@ -16,6 +16,12 @@ RAYLIB_VER  = 5.5
 RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
 RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
 
+# queue size is in terms of number of floats
+LFQ_DIR        = modules/LockFreeQueue
+LFQ_QUEUE_SIZE = 4096
+LFQ_BUILD      = $(LFQ_DIR)/build
+LFQ_LIB        = $(LFQ_BUILD)/libLockFreeQueue.a
+
 INCS        = -I$(SRCS_DIR) -I$(SRCS_DIR)/common -I$(RAYLIB_DIR) -I$(KISS_FFT_DIR)
 LIBS        = $(RAYLIB_LIB) $(KISS_FFT_LIB) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 
@@ -25,7 +31,7 @@ OBJS        = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 .PHONY: all
 all: $(NAME)
 
-$(NAME): $(RAYLIB_LIB) $(KISS_FFT_LIB) $(OBJS)
+$(NAME): $(RAYLIB_LIB) $(KISS_FFT_LIB) $(LFQ_LIB) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
 	@echo "\033[32mLinked $(NAME) successfully\033[0m"
 
@@ -36,6 +42,10 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+$(LFQ_LIB): $(BUILD_DIR)
+	cmake -S $(LFQ_DIR) -G Ninja -B $(LFQ_BUILD) -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE)
+	cmake --build $(LFQ_BUILD)
 
 $(KISS_FFT_LIB):
 	KISSFFT_DATATYPE=float KISSFFT_STATIC=1 KISSFFT_TOOLS=0 make all -C $(KISS_FFT_DIR) 
@@ -51,6 +61,7 @@ clean:
 distclean: clean
 	make -C $(RAYLIB_DIR) clean
 	make -C $(KISS_FFT_DIR) clean
+	$(RM) $(LFQ_BUILD)
 
 .PHONY: re
 re: clean all
