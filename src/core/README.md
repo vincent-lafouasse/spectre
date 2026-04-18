@@ -1,4 +1,4 @@
-# core module
+# core modules
 
 elements of code that depend on nothing but standard C and the `definitions.h` header
 
