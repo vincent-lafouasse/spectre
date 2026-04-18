@@ -2,10 +2,12 @@
 
 #include <math.h>
 
+#include "definitions.h"
+
 // a = exp(-2 * PI * f_c / f_s)
 OnePoleFilter filter_init(float cutoff_frequency, float sample_rate)
 {
-    const float alpha = expf(-2.0f * M_PI * cutoff_frequency / sample_rate);
+    const float alpha = expf(-2.0f * PI * cutoff_frequency / sample_rate);
 
     return (OnePoleFilter){
         .alpha = alpha,

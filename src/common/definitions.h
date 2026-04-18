@@ -13,6 +13,8 @@
 
 #define HISTORY_SIZE 1024
 
+#define PI 3.14159265358979323846264338327950f
+
 // one or two slices
 typedef struct {
     const float* slice1;
