@@ -6,6 +6,7 @@
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
 {
     float* input = calloc(cfg->size, sizeof(float));
+    float* buffer = calloc(cfg->size, sizeof(float));
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
     kiss_fftr_cfg plan = kiss_fftr_alloc(cfg->size, 0, NULL, NULL);
 
@@ -20,6 +21,7 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
         .plan = plan,
         .input = input,
         .output = output,
+        .buffer = buffer,
         .n_bins = n_bins,
         .history = history,
         .dc_blocker = dc_blocker,

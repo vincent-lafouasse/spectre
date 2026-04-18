@@ -19,7 +19,8 @@ typedef struct {
     FFTConfig cfg;
 
     kiss_fftr_cfg plan;
-    float* input;
+    float* input;   // where we collect the samples
+    float* buffer;  // where we filter, window and FFT the samples
     kiss_fft_cpx* output;
     const SizeType n_bins;
 
