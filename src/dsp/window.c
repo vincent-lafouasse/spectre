@@ -3,8 +3,6 @@
 #include <assert.h>
 #include <math.h>
 
-#include "definitions.h"
-
 void make_hann_window(float* window, SizeType N)
 {
     assert(N > 0);

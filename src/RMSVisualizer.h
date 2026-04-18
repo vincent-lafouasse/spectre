@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 #include "core/History.h"
-#include "definitions.h"
+#include "core/definitions.h"
 
 typedef struct {
     // the texture is contains the same info as the history

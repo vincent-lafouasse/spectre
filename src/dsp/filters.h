@@ -1,6 +1,6 @@
 #pragma once
 
-#include "definitions.h"
+#include "core/definitions.h"
 
 typedef struct {
     float alpha;

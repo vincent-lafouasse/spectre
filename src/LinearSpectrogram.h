@@ -4,7 +4,7 @@
 
 #include "FFTAnalyzer.h"
 #include "colormap/colormap.h"
-#include "definitions.h"
+#include "core/definitions.h"
 
 typedef struct {
     // the actual config

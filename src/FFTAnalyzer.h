@@ -4,7 +4,7 @@
 #include "kiss_fftr.h"
 
 #include "core/History.h"
-#include "definitions.h"
+#include "core/definitions.h"
 #include "dsp/filters.h"
 
 typedef struct {

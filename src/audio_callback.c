@@ -4,7 +4,7 @@
 #include <stdatomic.h>
 #include <stdlib.h>
 
-#include "definitions.h"
+#include "core/definitions.h"
 
 #define MONO_BUFFER_SIZE 1024
 

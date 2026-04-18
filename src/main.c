@@ -9,7 +9,7 @@
 #include "LinearSpectrogram.h"
 #include "audio_callback.h"
 #include "colormap/palette.h"
-#include "definitions.h"
+#include "core/definitions.h"
 
 #define WINDOW_NAME "spectre"
 #define WINDOW_WIDTH 1600

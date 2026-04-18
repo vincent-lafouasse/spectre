@@ -2,8 +2,6 @@
 
 #include <math.h>
 
-#include "definitions.h"
-
 // a = exp(-2 * PI * f_c / f_s)
 OnePoleFilter filter_init(float cutoff_frequency, float sample_rate)
 {
