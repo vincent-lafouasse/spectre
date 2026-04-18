@@ -22,6 +22,8 @@ DEV         = -O1 -g3                                      \
               -fsanitize=address,undefined                 \
               -fno-sanitize-recover=all                    \
               -fstack-protector-strong
+# TODO: do an actual release build instead of always making debug builds
+# low priority
 CFLAGS      = -std=$(C_VERSION) $(WARN) $(DEV)
 
 SRCS_DIR    = src
