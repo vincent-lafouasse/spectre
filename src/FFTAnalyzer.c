@@ -28,6 +28,7 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
         .input = input,
         .output = output,
         .buffer = buffer,
+        .window = window,
         .n_bins = n_bins,
         .history = history,
         .dc_blocker = dc_blocker,
