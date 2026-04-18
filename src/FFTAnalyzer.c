@@ -5,6 +5,7 @@
 
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
 {
+    // TODO: allocations can fail
     float* input = calloc(cfg->size, sizeof(float));
     float* buffer = calloc(cfg->size, sizeof(float));
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
