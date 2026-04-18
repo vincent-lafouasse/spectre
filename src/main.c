@@ -8,7 +8,7 @@
 #include "FFTAnalyzer.h"
 #include "LinearSpectrogram.h"
 #include "audio_callback.h"
-#include "colormap/palette.h"
+#include "core/colormap/palette.h"
 #include "core/definitions.h"
 
 #define WINDOW_NAME "spectre"

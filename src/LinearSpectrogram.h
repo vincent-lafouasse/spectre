@@ -3,7 +3,7 @@
 #include <raylib.h>
 
 #include "FFTAnalyzer.h"
-#include "colormap/colormap.h"
+#include "core/colormap/colormap.h"
 #include "core/definitions.h"
 
 typedef struct {

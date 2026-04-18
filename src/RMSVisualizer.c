@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "colormap/colormap.h"
+#include "core/colormap/colormap.h"
 
 static float clamp_unit(float f)
 {
