@@ -17,7 +17,8 @@ WARN        = -Wall -Wextra -Wpedantic                     \
               -Werror=implicit-int                         \
               -Werror=return-type                          \
               -Werror=incompatible-pointer-types
-DEV         = -O1 -g3 -fno-omit-frame-pointer              \
+DEV         = -O1 -g3                                      \
+              -fno-omit-frame-pointer                      \
               -fsanitize=address,undefined                 \
               -fno-sanitize-recover=all                    \
               -fstack-protector-strong                     \
