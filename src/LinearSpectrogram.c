@@ -34,13 +34,15 @@ static float clamp_unit(float f)
 static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
 {
     const float clamped = clamp_unit(intensity);
-    const int index = (int)(clamped * (cmap_size - 0.0001f));
+    const int index = (int)(clamped * ((float)cmap_size - 0.0001f));
     return *(const Color*)cmap[index];
 }
 
 LinearSpectrogram linear_spectrogram_new(const LinearSpectrogramConfig* cfg)
 {
-    Image img = GenImageColor(cfg->logical_width, cfg->logical_height, BLACK);
+    const int h = (int)cfg->logical_height;
+    const int w = (int)cfg->logical_width;
+    Image img = GenImageColor(h, w, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
     UnloadImage(img);
     SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);

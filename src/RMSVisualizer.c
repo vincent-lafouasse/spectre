@@ -12,13 +12,13 @@ static float clamp_unit(float f)
 static Color float_to_color(float intensity, Colormap cmap, SizeType cmap_size)
 {
     const float clamped = clamp_unit(intensity);
-    const int index = (int)(clamped * (cmap_size - 0.0001f));
+    const int index = (int)(clamped * ((float)cmap_size - 0.0001f));
     return *(const Color*)cmap[index];
 }
 
 RMSVisualizer rms_vis_new(SizeType size, float w, float h, Vector2 origin)
 {
-    Image img = GenImageColor(size, 1, BLACK);
+    Image img = GenImageColor((int)size, 1, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
     UnloadImage(img);
     SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
@@ -70,7 +70,7 @@ void rms_vis_update(RMSVisualizer* rv,
 void rms_vis_render_wrap(const RMSVisualizer* rv,
                          const FloatHistory* rms_history)
 {
-    const float band_width = rv->width / rms_history->cap;
+    const float band_width = (float)rv->width / (float)rms_history->cap;
 
     for (SizeType i = 0; i < rms_history->cap; i++) {
         if (rms_history->len < rms_history->cap && i >= rms_history->tail) {
