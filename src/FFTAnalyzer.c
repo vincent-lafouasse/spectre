@@ -57,17 +57,19 @@ SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
 
     SizeType n = 0;
     while (clfq_pop(&analyzer->rx, analyzer->input + to_keep, to_read)) {
-        // TODO: add a window
-
-        // HPF the incoming slice
+        // remove DC information from incoming slice
         filter_hpf_process(&analyzer->dc_blocker, analyzer->input + to_keep,
                            to_read);
 
-        kiss_fftr(analyzer->plan, analyzer->input, analyzer->output);
+        memcpy(analyzer->buffer, analyzer->input,
+               analyzer->cfg.size * sizeof(float));
+        apply_window(analyzer->buffer, analyzer->window, analyzer->cfg.size);
+        kiss_fftr(analyzer->plan, analyzer->buffer, analyzer->output);
 
-        // ditch DC bin
+        // the pointer shift means we ditch the DC bin
         fft_history_push(&analyzer->history, (Complex*)(analyzer->output + 1));
 
+        // make way for the next frame
         memmove(analyzer->input, analyzer->input + to_read,
                 to_keep * sizeof(float));
         ++n;
