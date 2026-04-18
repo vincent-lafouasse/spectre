@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "dsp/window.h"
+
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
 {
     // TODO: allocations can fail
     float* input = calloc(cfg->size, sizeof(float));
     float* buffer = calloc(cfg->size, sizeof(float));
+    float* window = malloc(cfg->size * sizeof(float));
+    make_hann_window(window, cfg->size);
+
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
     kiss_fftr_cfg plan = kiss_fftr_alloc(cfg->size, 0, NULL, NULL);
 

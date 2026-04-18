@@ -21,6 +21,7 @@ typedef struct {
     kiss_fftr_cfg plan;
     float* input;   // where we collect the samples
     float* buffer;  // where we filter, window and FFT the samples
+    float* window;  // this is a Hann function for now
     kiss_fft_cpx* output;
     const SizeType n_bins;
 
