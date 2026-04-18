@@ -23,7 +23,7 @@ DEV         = -O1 -g3                                      \
               -fno-sanitize-recover=all                    \
               -fstack-protector-strong                     \
               -D_FORTIFY_SOURCE=2
-CFLAGS      = $(WARN) -std=$(C_VERSION) -O3 -g
+CFLAGS      = -std=$(C_VERSION) $(WARN) $(DEV)
 
 SRCS_DIR    = src
 BUILD_DIR   = build
