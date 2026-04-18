@@ -52,6 +52,8 @@ CPPFLAGS = $(INCS)                            \
            -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE) \
            -MMD -MP
 
+# TODO: make a Linux build instead of hard relying on macOS
+# no windows
 LIBS = $(RAYLIB_LIB)        \
        $(KISS_FFT_LIB)      \
        $(LFQ_LIB)           \
