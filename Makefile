@@ -41,7 +41,9 @@ INCS = -I$(SRCS_DIR) -I$(SRCS_DIR)/common \
        -I$(KISS_FFT_DIR)                  \
        -I $(LFQ_DIR)
 
-CPPFLAGS = $(INCS) -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE)
+CPPFLAGS = $(INCS)                            \
+           -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE) \
+           -MMD -MP
 
 LIBS = $(RAYLIB_LIB)        \
        $(KISS_FFT_LIB)      \
@@ -55,6 +57,7 @@ LIBS = $(RAYLIB_LIB)        \
 
 SRCS = $(shell find src -name '*.c')
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
+DEPS = $(OBJS:%.o=%.d)
 
 .PHONY: all
 all: $(NAME)
@@ -106,3 +109,5 @@ b: all
 c: clean
 dc: distclean
 u: update
+
+-include $(DEPS)
