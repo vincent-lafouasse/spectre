@@ -14,7 +14,7 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
     make_hann_window(window, cfg->size);
 
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
-    kiss_fftr_cfg plan = kiss_fftr_alloc(cfg->size, 0, NULL, NULL);
+    kiss_fftr_cfg plan = kiss_fftr_alloc((int)cfg->size, 0, NULL, NULL);
 
     const SizeType n_bins = cfg->size / 2;  // ditch DC
     FFTHistory history = fft_history_new(cfg->history_size, n_bins);
