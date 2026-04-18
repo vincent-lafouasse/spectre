@@ -83,7 +83,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(LFQ_LIB): $(BUILD_DIR)
+$(LFQ_LIB):
 	cmake -S $(LFQ_DIR) -G Ninja -B $(LFQ_BUILD) -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE)
 	cmake --build $(LFQ_BUILD)
 
