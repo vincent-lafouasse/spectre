@@ -49,8 +49,7 @@ int main(int ac, const char** av)
         .window_width = WINDOW_WIDTH,
         .window_height = WINDOW_HEIGHT,
         .target_fps = 60,
-        // 100 px/s ≈ 16 s of audio on a 1600px-wide window at the default
-        // FFT config (stride=1024, sr=44100)
+        // 100 px/s ≈ 16 s of audio on a 1600px-wide window
         .scroll_speed_px_per_sec = 100.0f,
     };
 
