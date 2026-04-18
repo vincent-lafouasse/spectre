@@ -4,7 +4,6 @@ C_VERSION   = c11
 CFLAGS      = -Wall -Wextra -std=$(C_VERSION) -O3
 RM          = rm -rf
 
-ROOT        = $(PWD)
 SRCS_DIR    = src
 BUILD_DIR   = build
 
