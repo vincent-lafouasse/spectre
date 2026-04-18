@@ -44,6 +44,8 @@ void fft_analyzer_free(FFTAnalyzer* analyzer)
     kiss_fftr_free(analyzer->plan);
     free(analyzer->input);
     free(analyzer->output);
+    free(analyzer->buffer);
+    free(analyzer->window);
     fft_history_free(&analyzer->history);
 }
 
