@@ -13,6 +13,8 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
     float* window = malloc(cfg->size * sizeof(float));
     window_make_hann(window, cfg->size);
 
+    const float power_reference = window_power_reference(window, cfg->size);
+
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
     kiss_fftr_cfg plan = kiss_fftr_alloc((int)cfg->size, 0, NULL, NULL);
 
@@ -29,6 +31,7 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
         .output = output,
         .buffer = buffer,
         .window = window,
+        .power_reference = power_reference,
         .n_bins = n_bins,
         .history = history,
         .dc_blocker = dc_blocker,

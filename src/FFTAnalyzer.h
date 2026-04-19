@@ -28,6 +28,8 @@ typedef struct {
     LockFreeQueueConsumer rx;
     FFTHistory history;
     OnePoleFilter dc_blocker;
+
+    float power_reference;  // pre-computed from the window
 } FFTAnalyzer;
 
 FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx);
