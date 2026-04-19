@@ -11,7 +11,7 @@ FFTAnalyzer fft_analyzer_new(const FFTConfig* cfg, LockFreeQueueConsumer rx)
     float* input = calloc(cfg->size, sizeof(float));
     float* buffer = calloc(cfg->size, sizeof(float));
     float* window = malloc(cfg->size * sizeof(float));
-    make_hann_window(window, cfg->size);
+    window_make_hann(window, cfg->size);
 
     kiss_fft_cpx* output = malloc((1 + cfg->size / 2) * sizeof(kiss_fft_cpx));
     kiss_fftr_cfg plan = kiss_fftr_alloc((int)cfg->size, 0, NULL, NULL);
@@ -64,7 +64,7 @@ SizeType fft_analyzer_update(FFTAnalyzer* analyzer)
 
         memcpy(analyzer->buffer, analyzer->input,
                analyzer->cfg.size * sizeof(float));
-        apply_window(analyzer->buffer, analyzer->window, analyzer->cfg.size);
+        window_apply(analyzer->buffer, analyzer->window, analyzer->cfg.size);
         kiss_fftr(analyzer->plan, analyzer->buffer, analyzer->output);
 
         // the pointer shift means we ditch the DC bin
