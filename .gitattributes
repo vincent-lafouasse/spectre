@@ -1,2 +1,2 @@
 third_party/** linguist-vendored
-src/colormap/*.inc linguist-vendored
+src/core/colormap/*.inc linguist-vendored
