@@ -3,6 +3,7 @@ import matplotlib as mpl
 
 BASENAME = "colormap"
 
+# NOTE: those colormaps are awesomely CC0
 COLORMAPS = [
     "viridis",
     "plasma",
