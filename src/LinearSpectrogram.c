@@ -42,7 +42,7 @@ LinearSpectrogram linear_spectrogram_new(const LinearSpectrogramConfig* cfg)
 {
     const int h = (int)cfg->logical_height;
     const int w = (int)cfg->logical_width;
-    Image img = GenImageColor(h, w, BLACK);
+    Image img = GenImageColor(w, h, BLACK);
     Texture2D texture = LoadTextureFromImage(img);
     UnloadImage(img);
     SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
