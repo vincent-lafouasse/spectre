@@ -62,6 +62,14 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+        ${SPECTRE_WARN_FLAGS}
+        $<$<CONFIG:Debug>:-O1>
+        $<$<CONFIG:Debug>:-g3>
+        $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
+        $<$<CONFIG:Debug>:-fstack-protector-strong>
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE LockFreeQueue)
 target_link_libraries(${PROJECT_NAME} PRIVATE kissfft)
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
