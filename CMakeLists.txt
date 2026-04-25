@@ -97,7 +97,7 @@ if (APPLE)
         target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")
 endif()
 
-set(TESTING ON CACHE BOOL "compile tests" FORCE)
+set(TESTING OFF CACHE BOOL "compile tests")
 if(TESTING)
         enable_testing()
         add_subdirectory(test)
