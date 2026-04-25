@@ -68,6 +68,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:-g3>
         $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
         $<$<CONFIG:Debug>:-fstack-protector-strong>
+        -fdiagnostics-color=always
 )
 
 if(SPECTRE_SANITIZE)
