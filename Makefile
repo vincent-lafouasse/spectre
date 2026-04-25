@@ -1,122 +1,18 @@
-NAME        = spectre
+.PHONY: all build clean test
 
-CC          = gcc
-RM          = rm -rf
+all: build
 
-C_VERSION   = c11
-WARN        = -Wall -Wextra -Wpedantic                     \
-              -Wshadow -Wcast-align -Wcast-qual            \
-              -Wnull-dereference                           \
-              -Wdouble-promotion                           \
-              -Wconversion -Wsign-conversion               \
-              -Wstrict-prototypes -Wold-style-definition   \
-              -Wmissing-prototypes -Wmissing-declarations  \
-              -Wwrite-strings -Wredundant-decls            \
-              -Wformat=2 -Wvla                             \
-              -Werror=implicit-function-declaration        \
-              -Werror=implicit-int                         \
-              -Werror=return-type                          \
-              -Werror=incompatible-pointer-types
-DEV         = -O1 -g3                                      \
-              -fno-omit-frame-pointer                      \
-              -fsanitize=address,undefined                 \
-              -fno-sanitize-recover=all                    \
-              -fstack-protector-strong
-# TODO: do an actual release build instead of always making debug builds
-# low priority
-CFLAGS      = -std=$(C_VERSION) $(WARN) $(DEV)
+build:
+	cmake -B build -G Ninja
+	cmake --build build
 
-SRCS_DIR    = src
-BUILD_DIR   = build
-
-KISS_FFT_VER   = 131.2.0
-KISS_FFT_DIR   = third_party/kissfft-$(KISS_FFT_VER)
-KISS_FFT_LIB   = $(KISS_FFT_DIR)/libkissfft-float.a
-
-RAYLIB_VER  = 5.5
-RAYLIB_DIR  = third_party/raylib-$(RAYLIB_VER)/src
-RAYLIB_LIB  = $(RAYLIB_DIR)/libraylib.a
-
-# queue size is in terms of number of floats
-LFQ_DIR        = modules/LockFreeQueue
-LFQ_QUEUE_SIZE = 4096
-LFQ_BUILD      = $(LFQ_DIR)/build
-LFQ_LIB        = $(LFQ_BUILD)/libLockFreeQueue.a
-
-INCS = -I$(SRCS_DIR) -I$(SRCS_DIR)/common \
-       -I$(RAYLIB_DIR)                    \
-       -I$(KISS_FFT_DIR)                  \
-       -I $(LFQ_DIR)
-
-CPPFLAGS = $(INCS)                            \
-           -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE) \
-           -MMD -MP
-
-# TODO: make a Linux build instead of hard relying on macOS
-# no windows
-LIBS = $(RAYLIB_LIB)        \
-       $(KISS_FFT_LIB)      \
-       $(LFQ_LIB)           \
-       -framework CoreVideo \
-       -framework IOKit     \
-       -framework Cocoa     \
-       -framework GLUT      \
-       -framework OpenGL    \
-       -lm
-
-SRCS = $(shell find src -name '*.c')
-OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
-DEPS = $(OBJS:%.o=%.d)
-
-.PHONY: all
-all: $(NAME)
-
-$(NAME): $(RAYLIB_LIB) $(KISS_FFT_LIB) $(LFQ_LIB) $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
-	@echo "\033[32mLinked $(NAME) successfully\033[0m"
-
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
-	@echo "\033[34mCompiled $<\033[0m"
-
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-
-$(LFQ_LIB):
-	cmake -S $(LFQ_DIR) -G Ninja -B $(LFQ_BUILD) -DCLF_QUEUE_SIZE=$(LFQ_QUEUE_SIZE)
-	cmake --build $(LFQ_BUILD)
-
-$(KISS_FFT_LIB):
-	KISSFFT_DATATYPE=float KISSFFT_STATIC=1 KISSFFT_TOOLS=0 make all -C $(KISS_FFT_DIR) 
-
-$(RAYLIB_LIB):
-	RAYLIB_LIBTYPE=STATIC make -C $(RAYLIB_DIR)
-
-.PHONY: clean
 clean:
-	$(RM) $(BUILD_DIR) $(NAME)
+	rm -rf build
 
-.PHONY: distclean
-distclean: clean
-	make -C $(RAYLIB_DIR) clean
-	make -C $(KISS_FFT_DIR) clean
-	$(RM) $(LFQ_BUILD)
+test:
+	echo "TODO"
 
-.PHONY: re
-re: clean all
-
-.PHONY: update
-update: clean
-	mkdir -p build
-	bear --output $(BUILD_DIR)/compile_commands.json -- make all
-
-
-# couple of aliases
-.PHONY: b c dc u
-b: all
+.PHONY: b c t
+b: build
 c: clean
-dc: distclean
-u: update
-
--include $(DEPS)
+t: test
