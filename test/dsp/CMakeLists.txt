@@ -14,6 +14,7 @@ target_include_directories(test_dsp PRIVATE
 
 target_link_libraries(test_dsp PRIVATE
         unity
+        m
 )
 
 add_test(NAME dsp COMMAND test_dsp)
