@@ -1,5 +1,9 @@
 spectre
 build/
+build-release/
+build-tsan/
+build-wasm/
+
 .cache
 .idea
 .DS_Store
