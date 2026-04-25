@@ -5,6 +5,7 @@ target_sources(test_dsp PRIVATE
         ./test_dsp.c
 
         ${tested_src_dir}/dsp/window.c
+        ${tested_src_dir}/dsp/filters.c
 )
 
 target_include_directories(test_dsp PRIVATE
