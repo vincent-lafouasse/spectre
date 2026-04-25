@@ -32,5 +32,29 @@ jobs:
       - name: Build — Native binary
         run: cmake --build build --target spectre
 
-#  test:
+  test:
+    name: Test Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+#      i don't even need any of those per se but it's just easier to just install them
+      - name: Install build dependencies
+        run: sudo apt-get update -q && sudo apt-get install -y cmake gcc libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DTESTING=ON
+
+#      none of the deps need to be _built_ for the tests 
+#      - name: Build — Deps
+#        run: cmake --build build --target raylib kissfft LockFreeQueue
+
+      - name: Build — Tests
+        run: cmake --build build --target test_dsp
+
+      - name: Run — Tests
+        run: ctest --test-dir build --output-on-failure -V
+
 #  lint:
