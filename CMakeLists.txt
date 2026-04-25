@@ -56,9 +56,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/core/History.c
         src/core/colormap/colormap.c
 
-        src/dsp/window.h
         src/dsp/filters.c
-        src/dsp/filters.h
         src/dsp/window.c
 )
 
