@@ -1,18 +1,39 @@
-.PHONY: all build clean test
+.PHONY: all build release tsan run test clean distclean dev_setup wasm_setup b c t r
 
 all: build
 
-build:
-	cmake -B build -G Ninja
-	cmake --build build
+build/build.ninja:
+	cmake -B build -G Ninja -DTESTING=ON
+
+build-release/build.ninja:
+	cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DSPECTRE_SANITIZE=OFF
+
+build-tsan/build.ninja:
+	cmake -B build-tsan -G Ninja -DSPECTRE_SANITIZE=OFF -DSPECTRE_SANITIZE_THREAD=ON -DTESTING=ON
+
+build:   build/build.ninja         ; cmake --build build
+release: build-release/build.ninja ; cmake --build build-release
+tsan:    build-tsan/build.ninja    ; cmake --build build-tsan
+
+test: build
+	ctest --test-dir build --output-on-failure -V
 
 clean:
 	rm -rf build
 
-test:
-	echo "TODO"
+distclean:
+	rm -rf build build-release build-tsan build-wasm
 
-.PHONY: b c t
+# Pre-warm all native build dirs in one shot. Each per-dir target above will
+# also auto-bootstrap its own dir on first invocation, so dev_setup is purely a
+# convenience.
+dev_setup: build/build.ninja build-release/build.ninja build-tsan/build.ninja
+
+# Separate from dev_setup because emcmake requires Emscripten to be installed.
+wasm_setup:
+	emcmake cmake -B build-wasm -G Ninja
+
 b: build
 c: clean
 t: test
+r: run
