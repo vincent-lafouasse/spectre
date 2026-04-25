@@ -60,7 +60,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/dsp/window.c
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         ${SPECTRE_WARN_FLAGS}
