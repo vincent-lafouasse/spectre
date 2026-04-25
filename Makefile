@@ -2,32 +2,44 @@
 
 all: build
 
-build/build.ninja:
-	cmake -B build -G Ninja -DTESTING=ON
+DEBUG_DIR   = build
+RELEASE_DIR = build-release
+TSAN_DIR    = build-tsan
+WASM_DIR    = build-wasm
 
-build-release/build.ninja:
-	cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release -DSPECTRE_SANITIZE=OFF
+DEBUG_BUILD   = $(DEBUG_DIR)/build.ninja
+RELEASE_BUILD = $(RELEASE_DIR)/build.ninja
+TSAN_BUILD    = $(TSAN_DIR)/build.ninja
 
-build-tsan/build.ninja:
-	cmake -B build-tsan -G Ninja -DSPECTRE_SANITIZE=OFF -DSPECTRE_SANITIZE_THREAD=ON -DTESTING=ON
+DEFAULT_DIR   = $(DEBUG_DIR)
+DEFAULT_BUILD = $(DEBUG_BUILD)
 
-build:   build/build.ninja         ; cmake --build build
-release: build-release/build.ninja ; cmake --build build-release
-tsan:    build-tsan/build.ninja    ; cmake --build build-tsan
+$(DEBUG_BUILD):
+	cmake -B $(DEBUG_DIR) -G Ninja -DTESTING=ON
 
-test: build
-	ctest --test-dir build --output-on-failure -V
+$(RELEASE_BUILD):
+	cmake -B $(RELEASE_DIR) -G Ninja -DCMAKE_BUILD_TYPE=Release -DSPECTRE_SANITIZE=OFF
+
+$(TSAN_BUILD):
+	cmake -B $(TSAN_DIR) -G Ninja -DSPECTRE_SANITIZE=OFF -DSPECTRE_SANITIZE_THREAD=ON -DTESTING=ON
+
+build:   $(DEFAULT_BUILD)   ; cmake --build $(DEFAULT_DIR)
+release: $(RELEASE_BUILD)   ; cmake --build $(RELEASE_DIR)
+tsan:    $(TSAN_BUILD)      ; cmake --build $(TSAN_DIR)
+
+test: $(DEBUG_BUILD)
+	ctest --test-dir $(DEBUG_DIR) --output-on-failure -V
 
 clean:
-	rm -rf build
+	rm -rf $(DEFAULT_DIR)
 
 distclean:
-	rm -rf build build-release build-tsan build-wasm
+	rm -rf $(DEBUG_DIR) $(RELEASE_DIR) $(TSAN_DIR) $(WASM_DIR)
 
-dev_setup: build/build.ninja build-release/build.ninja build-tsan/build.ninja
+dev_setup: $(DEBUG_BUILD) $(RELEASE_BUILD) $(TSAN_BUILD)
 
 wasm_setup:
-	emcmake cmake -B build-wasm -G Ninja
+	emcmake cmake -B $(WASM_DIR) -G Ninja
 
 b: build
 c: clean
