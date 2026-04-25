@@ -37,6 +37,14 @@ else()
         option(SPECTRE_SANITIZE "build with AddressSanitizer + UBSan" ON)
 endif()
 
+option(SPECTRE_SANITIZE_THREAD "build with ThreadSanitizer (mutually exclusive with SPECTRE_SANITIZE)" OFF)
+
+if(SPECTRE_SANITIZE AND SPECTRE_SANITIZE_THREAD)
+        message(FATAL_ERROR
+                "SPECTRE_SANITIZE and SPECTRE_SANITIZE_THREAD are mutually exclusive — "
+                "TSan and ASan share signal handlers and shadow memory")
+endif()
+
 add_subdirectory(third_party/raylib-5.5)
 
 set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
@@ -86,6 +94,16 @@ if(SPECTRE_SANITIZE)
         )
         target_link_options(${PROJECT_NAME} PRIVATE
                 -fsanitize=address,undefined
+        )
+endif()
+
+if(SPECTRE_SANITIZE_THREAD)
+        target_compile_options(${PROJECT_NAME} PRIVATE
+                -fsanitize=thread
+                -fno-omit-frame-pointer
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE
+                -fsanitize=thread
         )
 endif()
 
