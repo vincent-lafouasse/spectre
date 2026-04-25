@@ -11,6 +11,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 add_subdirectory(third_party/raylib-5.5)
 
+set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
+set(KISSFFT_STATIC   ON    CACHE BOOL "" FORCE)
+set(KISSFFT_TOOLS    OFF   CACHE BOOL "" FORCE)
+set(KISSFFT_TEST     OFF   CACHE BOOL "" FORCE)
+add_subdirectory(third_party/kissfft-131.2.0)
+
 set(CLF_QUEUE_SIZE 4096 CACHE STRING "in terms of floats" FORCE)
 add_subdirectory(modules/LockFreeQueue)
 
