@@ -40,6 +40,8 @@ add_subdirectory(third_party/raylib-5.5)
 set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
 set(KISSFFT_STATIC   ON    CACHE BOOL "" FORCE)
 set(KISSFFT_TOOLS    OFF   CACHE BOOL "" FORCE)
+# Kiss FFT test reportedly take 20-40 minutes
+# i trust you @mborgerding, i don't need to run those
 set(KISSFFT_TEST     OFF   CACHE BOOL "" FORCE)
 add_subdirectory(third_party/kissfft-131.2.0)
 
