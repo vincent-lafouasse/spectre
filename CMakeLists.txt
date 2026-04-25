@@ -70,7 +70,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         ${SPECTRE_WARN_FLAGS}
         $<$<CONFIG:Debug>:-O1>
         $<$<CONFIG:Debug>:-g3>
-        $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
         $<$<CONFIG:Debug>:-fstack-protector-strong>
         -fdiagnostics-color=always
 )
@@ -79,6 +78,7 @@ if(SPECTRE_SANITIZE)
         target_compile_options(${PROJECT_NAME} PRIVATE
                 -fsanitize=address,undefined
                 -fno-sanitize-recover=all
+                -fno-omit-frame-pointer
         )
         target_link_options(${PROJECT_NAME} PRIVATE
                 -fsanitize=address,undefined
