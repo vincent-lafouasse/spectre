@@ -24,12 +24,8 @@ clean:
 distclean:
 	rm -rf build build-release build-tsan build-wasm
 
-# Pre-warm all native build dirs in one shot. Each per-dir target above will
-# also auto-bootstrap its own dir on first invocation, so dev_setup is purely a
-# convenience.
 dev_setup: build/build.ninja build-release/build.ninja build-tsan/build.ninja
 
-# Separate from dev_setup because emcmake requires Emscripten to be installed.
 wasm_setup:
 	emcmake cmake -B build-wasm -G Ninja
 
