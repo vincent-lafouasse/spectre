@@ -36,4 +36,3 @@ wasm_setup:
 b: build
 c: clean
 t: test
-r: run
