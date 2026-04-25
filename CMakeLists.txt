@@ -29,7 +29,11 @@ set(SPECTRE_WARN_FLAGS
         -Werror=incompatible-pointer-types
 )
 
-option(SPECTRE_SANITIZE "build with AddressSanitizer + UBSan" ON)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        option(SPECTRE_SANITIZE "build with AddressSanitizer + UBSan" OFF)
+else()
+        option(SPECTRE_SANITIZE "build with AddressSanitizer + UBSan" ON)
+endif()
 
 add_subdirectory(third_party/raylib-5.5)
 
