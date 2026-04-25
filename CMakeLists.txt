@@ -11,6 +11,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 add_subdirectory(third_party/raylib-5.5)
 
+set(CLF_QUEUE_SIZE 4096 CACHE STRING "" FORCE)
+add_subdirectory(modules/LockFreeQueue)
+
 SET(TESTING OFF CACHE BOOL "compile tests")
 if (TESTING)
         enable_testing()
