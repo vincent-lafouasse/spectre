@@ -13,6 +13,22 @@ if(NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
 endif()
 
+set(SPECTRE_WARN_FLAGS
+        -Wall -Wextra -Wpedantic
+        -Wshadow -Wcast-align -Wcast-qual
+        -Wnull-dereference
+        -Wdouble-promotion
+        -Wconversion -Wsign-conversion
+        -Wstrict-prototypes -Wold-style-definition
+        -Wmissing-prototypes -Wmissing-declarations
+        -Wwrite-strings -Wredundant-decls
+        -Wformat=2 -Wvla
+        -Werror=implicit-function-declaration
+        -Werror=implicit-int
+        -Werror=return-type
+        -Werror=incompatible-pointer-types
+)
+
 add_subdirectory(third_party/raylib-5.5)
 
 set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
