@@ -29,6 +29,8 @@ set(SPECTRE_WARN_FLAGS
         -Werror=incompatible-pointer-types
 )
 
+option(SPECTRE_SANITIZE "build with AddressSanitizer + UBSan" ON)
+
 add_subdirectory(third_party/raylib-5.5)
 
 set(KISSFFT_DATATYPE float CACHE STRING "" FORCE)
@@ -69,6 +71,16 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
         $<$<CONFIG:Debug>:-fstack-protector-strong>
 )
+
+if(SPECTRE_SANITIZE)
+        target_compile_options(${PROJECT_NAME} PRIVATE
+                -fsanitize=address,undefined
+                -fno-sanitize-recover=all
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE
+                -fsanitize=address,undefined
+        )
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LockFreeQueue)
 target_link_libraries(${PROJECT_NAME} PRIVATE kissfft)
