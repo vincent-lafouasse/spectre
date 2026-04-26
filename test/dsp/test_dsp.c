@@ -29,11 +29,47 @@ void test_hann_coherent_gain(void)
     TEST_ASSERT_FLOAT_WITHIN(1e-4f, actual_coherent_gain, expected_coherent_gain);
 }
 
+void test_window_apply_unit_signal_yields_window(void)
+{
+    // Multiplying by 1.0f is bit-exact, so applying the window to a DC signal
+    // of value 1 reproduces the window verbatim. Strict equality is fair.
+    enum { N = 64 };
+    float data[N], window[N];
+    for (SizeType i = 0; i < N; ++i) {
+        data[i] = 1.0f;
+    }
+    window_make_hann(window, N);
+    window_apply(data, window, N);
+
+    for (SizeType i = 0; i < N; ++i) {
+        TEST_ASSERT_EQUAL_FLOAT(window[i], data[i]);
+    }
+}
+
+void test_window_apply_zero_signal_yields_zero(void)
+{
+    // 0 · anything must be 0. Catches anything weird in window_apply doing
+    // more than a multiplication.
+    enum { N = 64 };
+    float data[N], window[N];
+    for (SizeType i = 0; i < N; ++i) {
+        data[i] = 0.0f;
+    }
+    window_make_hann(window, N);
+    window_apply(data, window, N);
+
+    for (SizeType i = 0; i < N; ++i) {
+        TEST_ASSERT_EQUAL_FLOAT(0.0f, data[i]);
+    }
+}
+
 int main(void)
 {
     UNITY_BEGIN();
 
     RUN_TEST(test_hann_coherent_gain);
+    RUN_TEST(test_window_apply_unit_signal_yields_window);
+    RUN_TEST(test_window_apply_zero_signal_yields_zero);
 
     return UNITY_END();
 }
