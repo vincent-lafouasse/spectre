@@ -83,8 +83,10 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_hann_coherent_gain);
+
     RUN_TEST(test_window_apply_unit_signal_yields_window);
     RUN_TEST(test_window_apply_zero_signal_yields_zero);
+
     RUN_TEST(test_window_power_reference_hann);
 
     return UNITY_END();
