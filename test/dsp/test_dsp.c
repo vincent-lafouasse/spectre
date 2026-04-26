@@ -26,7 +26,8 @@ void test_hann_coherent_gain(void)
     // Naive-sum forward error bound (Higham): N·ε·Σ|x_i| ≈ 2.5e-4 absolute on
     // the sum, ≈1.2e-4 absolute on CG. Empirical is closer to 1e-5; we leave
     // headroom so this never flakes on float noise.
-    TEST_ASSERT_FLOAT_WITHIN(1e-4f, actual_coherent_gain, expected_coherent_gain);
+    TEST_ASSERT_FLOAT_WITHIN(1e-4f, actual_coherent_gain,
+                             expected_coherent_gain);
 }
 
 void test_window_apply_unit_signal_yields_window(void)
