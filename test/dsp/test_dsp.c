@@ -64,6 +64,20 @@ void test_window_apply_zero_signal_yields_zero(void)
     }
 }
 
+void test_window_power_reference_hann(void)
+{
+    enum { N = 2048 };
+    float window[N];
+    window_make_hann(window, N);
+
+    const float pref = window_power_reference(window, N);
+    const float exact = 4.0f / ((float)(N - 1) * (float)(N - 1));
+
+    // Expected value is ~9.5e-7. Absolute tolerance is meaningless at that
+    // magnitude — use a relative one (1e-3 of expected).
+    TEST_ASSERT_FLOAT_WITHIN(exact * 1e-3f, exact, pref);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -71,6 +85,7 @@ int main(void)
     RUN_TEST(test_hann_coherent_gain);
     RUN_TEST(test_window_apply_unit_signal_yields_window);
     RUN_TEST(test_window_apply_zero_signal_yields_zero);
+    RUN_TEST(test_window_power_reference_hann);
 
     return UNITY_END();
 }
