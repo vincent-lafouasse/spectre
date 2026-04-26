@@ -27,7 +27,7 @@ build:   $(DEFAULT_BUILD)   ; cmake --build $(DEFAULT_DIR)
 release: $(RELEASE_BUILD)   ; cmake --build $(RELEASE_DIR)
 tsan:    $(TSAN_BUILD)      ; cmake --build $(TSAN_DIR)
 
-test: $(DEBUG_BUILD)
+test: build
 	ctest --test-dir $(DEBUG_DIR) --output-on-failure -V
 
 clean:
