@@ -23,18 +23,18 @@ int main(int ac, char* av[])
         return 1;
     }
 
-    const char* input_wav = av[1];
+    const char* input_wav_path = av[1];
     const char* output_pgm = av[2];
     (void)output_pgm;
 
-    if (!str_ends_with(input_wav, ".wav")) {
+    if (!str_ends_with(input_wav_path, ".wav")) {
         fprintf(stderr, "Only wav files are supported for now\n");
         return 1;
     }
 
     drwav wav;
-    if (!drwav_init_file(&wav, input_wav, NULL)) {
-        fprintf(stderr, "dump: failed to open %s\n", input_wav);
+    if (!drwav_init_file(&wav, input_wav_path, NULL)) {
+        fprintf(stderr, "dump: failed to open %s\n", input_wav_path);
         exit(1);
     }
 
