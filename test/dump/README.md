@@ -5,5 +5,7 @@ dump spectrograms as .pgm as a way to detect changes during refactors, hopefully
 ## usage
 
 ```
-Usage: dump <input audio> <output.pgm>
+Usage: dump <input audio>
 ```
+
+pgm spectrogram is written to stdout
