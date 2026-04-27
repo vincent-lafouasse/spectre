@@ -34,7 +34,7 @@ int main(int ac, char* av[])
 
     drwav wav;
     if (!drwav_init_file(&wav, input_wav_path, NULL)) {
-        fprintf(stderr, "dump: failed to open %s\n", input_wav_path);
+        fprintf(stderr, "drwav: failed to decode audio file %s\n", input_wav_path);
         exit(1);
     }
 
