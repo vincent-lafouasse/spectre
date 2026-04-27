@@ -18,14 +18,12 @@ static bool str_ends_with(const char* s, const char* suffix)
 
 int main(int ac, char* av[])
 {
-    if (ac != 3) {
-        fprintf(stderr, "Usage: dump <input audio> <output.pgm>\n");
+    if (ac != 2) {
+        fprintf(stderr, "Usage: dump <input audio>\n");
         return 1;
     }
 
     const char* input_wav_path = av[1];
-    const char* output_pgm = av[2];
-    (void)output_pgm;
 
     if (!str_ends_with(input_wav_path, ".wav")) {
         fprintf(stderr, "Only wav files are supported for now\n");
@@ -34,7 +32,8 @@ int main(int ac, char* av[])
 
     drwav wav;
     if (!drwav_init_file(&wav, input_wav_path, NULL)) {
-        fprintf(stderr, "drwav: failed to decode audio file %s\n", input_wav_path);
+        fprintf(stderr, "drwav: failed to decode audio file %s\n",
+                input_wav_path);
         exit(1);
     }
 
