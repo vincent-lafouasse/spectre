@@ -38,7 +38,7 @@ int main(int ac, char* av[])
 
     drwav wav;
     if (!drwav_init_file(&wav, input_wav_path, NULL)) {
-        fprintf(stderr, "drwav: failed to decode audio file %s\n",
+        fprintf(stderr, "drwav: failed to init wav decoder from file %s\n",
                 input_wav_path);
         exit(1);
     }
