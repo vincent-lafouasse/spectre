@@ -7,7 +7,7 @@
 
 static bool str_ends_with(const char* s, const char* suffix)
 {
-    if (strlen(s) > strlen(suffix)) {
+    if (strlen(suffix) > strlen(s)) {
         return false;
     }
 
