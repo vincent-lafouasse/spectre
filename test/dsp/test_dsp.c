@@ -78,6 +78,46 @@ void test_window_power_reference_hann(void)
     TEST_ASSERT_FLOAT_WITHIN(exact * 1e-3f, exact, pref);
 }
 
+void test_filter_hpf_removes_dc_from_mixed_signal(void)
+{
+    // An LTI filter with H(0)=0 outputs zero mean in steady state for *any*
+    // input. Build a sine-plus-DC signal, run it through the HPF, let the
+    // transient die, and check the windowed mean is ~0. f_signal is chosen so
+    // an integer number of cycles fits in the analysis window — that kills
+    // truncation error from a partial period; anything left is float noise.
+    enum { N = 4096 };
+
+    const float fs = 48000.0f;
+    const float fc = 50.0f;
+    const float f_signal =
+        750.0f;  // 64 spp → 32 full cycles over [TRANSIENT, N)
+    const float dc_offset = 2.0f;
+
+    float data[N];
+    for (SizeType i = 0; i < N; ++i) {
+        data[i] = sinf(2.0f * PI * f_signal * (float)i / fs) + dc_offset;
+    }
+
+    OnePoleFilter f = filter_init(fc, fs);
+    filter_hpf_process(&f, data, N);
+
+    // Verify our skip window is at least 7τ — guarantees the un-blocked DC
+    // residue is ≤ e^-7 ≈ 0.09 % (-60 dB) before we start measuring. For the
+    // impulse-invariant α used in filter_init, τ in samples is just the
+    // angular period of the cutoff: τ = fs / (2π·fc).
+    const float tau = fs / (2.0f * PI * fc);
+    const SizeType transient = N / 2;
+    TEST_ASSERT_GREATER_THAN_FLOAT(7.0f * tau, (float)transient);
+
+    float sum = 0.0f;
+    for (SizeType i = transient; i < N; ++i) {
+        sum += data[i];
+    }
+    const float mean = sum / (float)(N - transient);
+
+    TEST_ASSERT_FLOAT_WITHIN(1e-4f, 0.0f, mean);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -88,6 +128,8 @@ int main(void)
     RUN_TEST(test_window_apply_zero_signal_yields_zero);
 
     RUN_TEST(test_window_power_reference_hann);
+
+    RUN_TEST(test_filter_hpf_removes_dc_from_mixed_signal);
 
     return UNITY_END();
 }
