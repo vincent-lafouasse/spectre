@@ -16,6 +16,12 @@ static bool str_ends_with(const char* s, const char* suffix)
     return (strcmp(s_suffix, suffix) == 0);
 }
 
+struct MonoAudioBuffer {
+    float* samples;
+    float sample_rate;
+    size_t size;
+};
+
 int main(int ac, char* av[])
 {
     if (ac != 2) {
