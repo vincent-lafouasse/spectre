@@ -37,30 +37,47 @@ static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
         exit(1);
     }
 
-    if (decoder.channels == 0) {
-        fprintf(stderr, "invalid channel layout: somehow no channels\n");
-        exit(1);
-    }
-
+    uint32_t channels = decoder.channels;
     uint64_t frames = decoder.totalPCMFrameCount;
     if (frames == 0) {
         fprintf(stderr, "empty wav file\n");
         exit(1);
     }
+    if (channels == 0) {
+        fprintf(stderr, "invalid channel layout: somehow no channels\n");
+        exit(1);
+    }
 
-    struct MonoAudioBuffer out = {
-        .samples = calloc(frames, sizeof(float)),
-        .sample_rate = decoder.sampleRate,
-        .size = decoder.totalPCMFrameCount,
-    };
-    if (out.samples == NULL) {
+    float* interleaved = calloc(channels * frames, sizeof(float));
+    if (interleaved == NULL) {
+        fprintf(stderr, "oom\n");
+        exit(1);
+    }
+    drwav_read_pcm_frames_f32(&decoder, frames, interleaved);
+    drwav_uninit(&decoder);
+
+    float* mono = calloc(frames, sizeof(float));
+    if (mono == NULL) {
         fprintf(stderr, "oom\n");
         exit(1);
     }
 
-    drwav_uninit(&decoder);
+    const float gain = 1.0f / (float)channels;
+    for (uint64_t i = 0; i < frames; ++i) {
+        float sample = 0.0f;
+        for (uint32_t c = 0; c < channels; ++c) {
+            sample += interleaved[c * channels + i];
+        }
 
-    return out;
+        mono[i] = gain * sample;
+    }
+    free(interleaved);
+
+    return (struct MonoAudioBuffer){
+        .samples = mono,
+        .sample_rate = decoder.sampleRate,
+        .size = decoder.totalPCMFrameCount,
+    };
 }
 
 int main(int ac, char* av[])
