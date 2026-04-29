@@ -22,6 +22,7 @@ struct MonoAudioBuffer {
     size_t size;
 };
 
+// sloppy ressource management; shouldn't matter here
 static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
 {
     if (!str_ends_with(path, ".wav")) {
