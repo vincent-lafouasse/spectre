@@ -30,14 +30,18 @@ static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
         exit(1);
     }
 
-    struct MonoAudioBuffer out = {0};
-
     drwav decoder;
     if (!drwav_init_file(&decoder, path, NULL)) {
         fprintf(stderr, "drwav: failed to init wav decoder from file %s\n",
                 path);
         exit(1);
     }
+
+    struct MonoAudioBuffer out = {
+        .samples = NULL,
+        .sample_rate = decoder.sampleRate,
+        .size = decoder.totalPCMFrameCount,
+    };
 
     drwav_uninit(&decoder);
 
