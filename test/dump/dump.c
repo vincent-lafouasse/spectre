@@ -66,7 +66,7 @@ static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
     for (uint64_t i = 0; i < frames; ++i) {
         float sample = 0.0f;
         for (uint32_t c = 0; c < channels; ++c) {
-            sample += interleaved[c * channels + i];
+            sample += interleaved[channels * i + c];
         }
 
         mono[i] = gain * sample;
