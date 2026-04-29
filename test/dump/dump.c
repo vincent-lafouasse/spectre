@@ -22,6 +22,27 @@ struct MonoAudioBuffer {
     size_t size;
 };
 
+static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
+{
+    if (!str_ends_with(path, ".wav")) {
+        fprintf(stderr, "Not a wav file\n");
+        exit(1);
+    }
+
+    struct MonoAudioBuffer out = {0};
+
+    drwav decoder;
+    if (!drwav_init_file(&decoder, path, NULL)) {
+        fprintf(stderr, "drwav: failed to init wav decoder from file %s\n",
+                path);
+        exit(1);
+    }
+
+    drwav_uninit(&decoder);
+
+    return out;
+}
+
 int main(int ac, char* av[])
 {
     if (ac != 2) {
@@ -29,19 +50,10 @@ int main(int ac, char* av[])
         return 1;
     }
 
-    const char* input_wav_path = av[1];
+    const char* input = av[1];
 
-    if (!str_ends_with(input_wav_path, ".wav")) {
-        fprintf(stderr, "Only wav files are supported for now\n");
-        return 1;
-    }
-
-    drwav wav;
-    if (!drwav_init_file(&wav, input_wav_path, NULL)) {
-        fprintf(stderr, "drwav: failed to init wav decoder from file %s\n",
-                input_wav_path);
-        exit(1);
-    }
+    struct MonoAudioBuffer audio = decode_wav_or_exit(input);
+    (void)audio;
 
     printf("ok\n");
     return 0;
