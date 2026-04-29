@@ -18,8 +18,8 @@ static bool str_ends_with(const char* s, const char* suffix)
 
 struct MonoAudioBuffer {
     float* samples;
-    float sample_rate;
-    size_t size;
+    uint32_t sample_rate;
+    uint64_t size;
 };
 
 // sloppy ressource management; shouldn't matter here
