@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "core/History.h"
+#include "core/intensity.h"
 
 LinearSpectrogramConfig linear_spectrogram_config(Rectangle screen,
                                                   Colormap cmap,
@@ -70,17 +71,8 @@ static Color linear_spectrogram_assign_color(const LinearSpectrogram* spec,
                                              Complex bin)
 {
     const LinearSpectrogramConfig* cfg = &spec->cfg;
-
-    const float re = crealf(bin);
-    const float im = cimagf(bin);
-
-    const float power = re * re + im * im;
-    const float db = 10.0f * log10f((power / cfg->power_reference) + 1e-9f);
-
-    // scale [min_db, reference_power] to [0, 1]
-    // reference_power would appear here but it's 0dB by definition
-    const float intensity = (db - cfg->min_dB) / (-cfg->min_dB);
-
+    const float intensity =
+        intensity_from_bin(bin, cfg->power_reference, cfg->min_dB);
     return float_to_color(intensity, cfg->cmap, COLORMAP_SIZE);
 }
 

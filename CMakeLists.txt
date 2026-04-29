@@ -70,6 +70,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/audio_callback.c
 
         src/core/History.c
+        src/core/intensity.c
         src/core/colormap/colormap.c
 
         src/dsp/filters.c
