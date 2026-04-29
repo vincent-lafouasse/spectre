@@ -15,6 +15,8 @@ target_include_directories(dump PRIVATE
         ${PROJECT_SOURCE_DIR}/test/third_party/dr_libs
 )
 
+target_compile_options(dump PRIVATE ${SPECTRE_WARN_FLAGS})
+
 target_link_libraries(dump PRIVATE
         kissfft
         LockFreeQueue
