@@ -37,11 +37,26 @@ static struct MonoAudioBuffer decode_wav_or_exit(const char* path)
         exit(1);
     }
 
+    if (decoder.channels == 0) {
+        fprintf(stderr, "invalid channel layout: somehow no channels\n");
+        exit(1);
+    }
+
+    uint64_t frames = decoder.totalPCMFrameCount;
+    if (frames == 0) {
+        fprintf(stderr, "empty wav file\n");
+        exit(1);
+    }
+
     struct MonoAudioBuffer out = {
-        .samples = NULL,
+        .samples = calloc(frames, sizeof(float)),
         .sample_rate = decoder.sampleRate,
         .size = decoder.totalPCMFrameCount,
     };
+    if (out.samples == NULL) {
+        fprintf(stderr, "oom\n");
+        exit(1);
+    }
 
     drwav_uninit(&decoder);
 
